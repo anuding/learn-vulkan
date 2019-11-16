@@ -1,0 +1,4 @@
+cmake_minimum_required(VERSION 3.12)
+SET(CMAKE_CXX_STANDARD 17)
+PROJECT(engine)
+ADD_SUBDIRECTORY(src bin)
