@@ -11,9 +11,10 @@ const bool enableValidationLayers = true;
 
 struct QueueFamilyIndices {
     int graphicsFamily = -1;
+    int presentFamily = -1;
 
     bool isComplete() {
-        return graphicsFamily >= 0;
+        return graphicsFamily >= 0 && presentFamily >= 0;
     }
 };
 
@@ -28,6 +29,9 @@ private:
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkDevice device;
     VkQueue graphicsQueue;
+    VkQueue presentQueue;
+
+    VkSurfaceKHR surface;
 
     GLFWwindow *window;
     VkInstance instance;
@@ -72,4 +76,6 @@ public:
     QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
 
     void createLogicalDevice();
+
+    void createSurface();
 };
