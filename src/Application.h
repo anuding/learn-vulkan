@@ -18,6 +18,12 @@ struct QueueFamilyIndices {
     }
 };
 
+struct SwapChainSupportdDetails{
+    VkSurfaceCapabilitiesKHR capabilitiesKhr;
+    std::vector<VkSurfaceFormatKHR> formats;
+    std::vector<VkPresentModeKHR> presentModes;
+};
+
 class Application {
 private:
     const uint32_t WIDTH = 800;
@@ -25,9 +31,12 @@ private:
     const std::vector<const char *> validationLayers = {
             "VK_LAYER_KHRONOS_validation"
     };
+    const std::vector<const char *> deviceExtensions ={
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
     VkDebugUtilsMessengerEXT debugMessenger;
-    VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-    VkDevice device;
+    VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
+    VkDevice _device;
     VkQueue graphicsQueue;
     VkQueue presentQueue;
 
@@ -52,7 +61,7 @@ public:
 
     std::vector<const char *> getRequiredExtensions();
 
-    void checkExtensionsSupport(const std::vector<const char *> &requiredExtensions);
+    void checkInstanceExtensionsSupport(const std::vector<const char *> &requiredExtensions);
 
     void setupDebugMessenger();
 
@@ -69,13 +78,17 @@ public:
 
     void pickPhysicalDevice();
 
-    void checkDeviceSupport(std::vector<VkPhysicalDevice> &devices);
+    void checkPhysicalDeviceSupport(std::vector<VkPhysicalDevice> &vkPhysicalDevices);
 
-    bool isDeviceSuitable(VkPhysicalDevice device);
+    bool isDeviceSuitable(VkPhysicalDevice vkPhysicalDevice);
 
-    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device);
+    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice vkPhysicalDevice);
 
     void createLogicalDevice();
 
     void createSurface();
+
+    bool checkPhysicalDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
+
+    SwapChainSupportdDetails querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice);
 };
