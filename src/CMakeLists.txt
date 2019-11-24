@@ -1,18 +1,20 @@
-# # Add definition for math library
-add_library(Application Application.cpp)
+ADD_LIBRARY(Application Application.cpp)
+ADD_LIBRARY(swapchain_helper SwapChain.cpp)
+ADD_LIBRARY(shader_helper Shader.cpp)
+
+ADD_EXECUTABLE(engine main.cpp)
+
+TARGET_LINK_LIBRARIES(engine Application)
+TARGET_LINK_LIBRARIES(engine swapchain_helper)
+TARGET_LINK_LIBRARIES(engine shader_helper)
+
 IF(UNIX)
 	MESSAGE(STATUS "Current platform: UNIX ")
 	FIND_PACKAGE(glfw3 3.3 REQUIRED)
 	FIND_PACKAGE(Vulkan REQUIRED)
-	ADD_EXECUTABLE(engine main.cpp)
-	ADD_LIBRARY(swapchain_helper SwapChain.cpp)
-	ADD_LIBRARY(shader_helper Shader.cpp)
 
 	TARGET_COMPILE_DEFINITIONS(engine PRIVATE VK_USE_PLATFORM_XCB_KHR)
 	TARGET_INCLUDE_DIRECTORIES(engine PRIVATE Vulkan::Vulkan)
-	TARGET_LINK_LIBRARIES(engine Application)
-	TARGET_LINK_LIBRARIES(engine swapchain_helper)
-	TARGET_LINK_LIBRARIES(engine shader_helper)
 	TARGET_LINK_LIBRARIES(engine glfw)
 	TARGET_LINK_LIBRARIES(engine Vulkan::Vulkan)
 ENDIF()
@@ -25,10 +27,7 @@ IF(WIN32)
 	INCLUDE_DIRECTORIES(D:\\CG_SDKS\\VulkanSDK\\1.1.121.2\\Include)
 	LINK_DIRECTORIES(D:\\CG_SDKS\\VulkanSDK\\1.1.121.2\\Lib)
 
-	ADD_EXECUTABLE(engine main.cpp)
 	TARGET_COMPILE_DEFINITIONS(engine PRIVATE VK_USE_PLATFORM_WIN32_KHR)
-
-	TARGET_LINK_LIBRARIES(engine Application)
 	TARGET_LINK_LIBRARIES(engine glfw3)
 	TARGET_LINK_LIBRARIES(engine vulkan-1)
 ENDIF()
