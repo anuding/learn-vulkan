@@ -36,8 +36,12 @@ namespace Engine::RenderCore {
         VkDevice _device;
         VkQueue _graphicsQueue;
         VkQueue _presentQueue;
-        VkSwapchainKHR  _swapChain;
+        VkSwapchainKHR _swapChain;
         VkSurfaceKHR _surface;
+        std::vector<VkImage> _swapChainImages;
+        std::vector<VkImageView> _swapChainImageViews;
+        VkFormat _swapChainImageFormat;
+        VkExtent2D _swapChainExtent;
 
         GLFWwindow *_window;
         VkInstance _instance;
@@ -90,5 +94,7 @@ namespace Engine::RenderCore {
         SwapChainHelper::SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice);
 
         void createSwapChain();
+
+        void createImageViews();
     };
 }

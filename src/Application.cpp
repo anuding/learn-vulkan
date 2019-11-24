@@ -27,6 +27,7 @@ namespace Engine::RenderCore {
         pickPhysicalDevice();
         createLogicalDevice();
         createSwapChain();
+        createImageViews();
     }
 
     void Application::mainLoop() {
@@ -36,7 +37,10 @@ namespace Engine::RenderCore {
     }
 
     void Application::cleanUp() {
-        vkDestroySwapchainKHR(_device,_swapChain, nullptr);
+        for (auto imageView: _swapChainImageViews) {
+            vkDestroyImageView(_device, imageView, nullptr);
+        }
+        vkDestroySwapchainKHR(_device, _swapChain, nullptr);
         vkDestroyDevice(_device, nullptr);
         if (enableValidationLayers)
             DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
@@ -354,7 +358,7 @@ namespace Engine::RenderCore {
         VkSwapchainCreateInfoKHR createInfoKhr = {};
         createInfoKhr.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
         createInfoKhr.surface = _surface;
-        createInfoKhr.minImageCount=imageCount;
+        createInfoKhr.minImageCount = imageCount;
         createInfoKhr.imageFormat = surfaceFormatKhr.format;
         createInfoKhr.imageColorSpace = surfaceFormatKhr.colorSpace;
         createInfoKhr.imageExtent = extent2D;
@@ -373,15 +377,43 @@ namespace Engine::RenderCore {
             createInfoKhr.queueFamilyIndexCount = 0;
             createInfoKhr.pQueueFamilyIndices = nullptr;
         }
-        createInfoKhr.preTransform=details.capabilitiesKhr.currentTransform;
-        createInfoKhr.compositeAlpha=VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        createInfoKhr.preTransform = details.capabilitiesKhr.currentTransform;
+        createInfoKhr.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
         createInfoKhr.presentMode = presentModeKhr;
         createInfoKhr.clipped = VK_TRUE;
-        createInfoKhr.oldSwapchain=VK_NULL_HANDLE;
+        createInfoKhr.oldSwapchain = VK_NULL_HANDLE;
 
-        if(vkCreateSwapchainKHR(_device,&createInfoKhr, nullptr,&_swapChain)!=VK_SUCCESS)
-        {
+        if (vkCreateSwapchainKHR(_device, &createInfoKhr, nullptr, &_swapChain) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain");
+        }
+
+        vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, nullptr)
+        _swapChainImages.resize(imageCount);
+        vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, _swapChainImages.data());
+        _swapChainImageFormat = surfaceFormatKhr.format;
+        _swapChainExtent = extent2D;
+    }
+
+    void Application::createImageViews() {
+        _swapChainImageViews.resize(_swapChainImages.size());
+        for (size_t i = 0; i < _swapChainImages.size(); i++) {
+            VkImageViewCreateInfo createInfo = {};
+            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            createInfo.format = _swapChainImageFormat;
+            createInfo.image = _swapChainImages[i];
+            createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            createInfo.subresourceRange.baseArrayLayer = 0;
+            createInfo.subresourceRange.baseMipLevel = 0;
+            createInfo.subresourceRange.levelCount = 1;
+            createInfo.subresourceRange.layerCount = 1;
+            if (vkCreateImageView(_device, &createInfo, nullptr, &_swapChainImageViews[i]) != VK_SUCCESS) {
+                throw std::runtime_error("failed to create image view");
+            }
         }
     }
 }
