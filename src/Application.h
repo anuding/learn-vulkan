@@ -25,22 +25,22 @@ namespace Engine::RenderCore {
     private:
         const uint32_t WIDTH = 800;
         const uint32_t HEIGHT = 600;
-        const std::vector<const char *> validationLayers = {
+        const std::vector<const char *> _validationLayers = {
                 "VK_LAYER_KHRONOS_validation"
         };
-        const std::vector<const char *> deviceExtensions = {
+        const std::vector<const char *> _deviceExtensions = {
                 VK_KHR_SWAPCHAIN_EXTENSION_NAME
         };
-        VkDebugUtilsMessengerEXT debugMessenger;
+        VkDebugUtilsMessengerEXT _debugMessenger;
         VkPhysicalDevice _physicalDevice = VK_NULL_HANDLE;
         VkDevice _device;
-        VkQueue graphicsQueue;
-        VkQueue presentQueue;
+        VkQueue _graphicsQueue;
+        VkQueue _presentQueue;
+        VkSwapchainKHR  _swapChain;
+        VkSurfaceKHR _surface;
 
-        VkSurfaceKHR surface;
-
-        GLFWwindow *window;
-        VkInstance instance;
+        GLFWwindow *_window;
+        VkInstance _instance;
     public:
         void run();
 
@@ -87,7 +87,7 @@ namespace Engine::RenderCore {
 
         bool checkPhysicalDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
 
-        SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice);
+        SwapChainHelper::SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice);
 
         void createSwapChain();
     };

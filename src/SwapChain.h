@@ -9,7 +9,7 @@
 #include <vector>
 
 namespace Engine::RenderCore {
-    namespace SwapChain {
+    namespace SwapChainHelper {
         struct SwapChainSupportedDetails {
             VkSurfaceCapabilitiesKHR capabilitiesKhr;
             std::vector<VkSurfaceFormatKHR> formats;

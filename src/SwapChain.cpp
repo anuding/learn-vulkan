@@ -6,7 +6,7 @@
 #include "SwapChain.h"
 
 namespace Engine::RenderCore {
-    namespace SwapChain {
+    namespace SwapChainHelper {
         const uint32_t WIDTH = 720;
         const uint32_t HEIGHT = 480;
 

@@ -16,7 +16,7 @@ namespace Engine::RenderCore {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_FALSE);
-        window = glfwCreateWindow(WIDTH, HEIGHT, "blacklist4000", nullptr, nullptr);
+        _window = glfwCreateWindow(WIDTH, HEIGHT, "blacklist4000", nullptr, nullptr);
     }
 
     void Application::initVulkan() {
@@ -30,19 +30,20 @@ namespace Engine::RenderCore {
     }
 
     void Application::mainLoop() {
-        while (!glfwWindowShouldClose(window)) {
+        while (!glfwWindowShouldClose(_window)) {
             glfwPollEvents();
         }
     }
 
     void Application::cleanUp() {
+        vkDestroySwapchainKHR(_device,_swapChain, nullptr);
         vkDestroyDevice(_device, nullptr);
         if (enableValidationLayers)
-            DestroyDebugUtilsMessengerEXT(instance, debugMessenger, nullptr);
+            DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
 
-        vkDestroySurfaceKHR(instance, surface, nullptr);
-        vkDestroyInstance(instance, nullptr);
-        glfwDestroyWindow(window);
+        vkDestroySurfaceKHR(_instance, _surface, nullptr);
+        vkDestroyInstance(_instance, nullptr);
+        glfwDestroyWindow(_window);
         glfwTerminate();
     }
 
@@ -70,8 +71,8 @@ namespace Engine::RenderCore {
 
         VkDebugUtilsMessengerCreateInfoEXT debugUtilsMessengerCreateInfoExt;
         if (enableValidationLayers) {
-            instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-            instanceCreateInfo.ppEnabledLayerNames = validationLayers.data();
+            instanceCreateInfo.enabledLayerCount = static_cast<uint32_t>(_validationLayers.size());
+            instanceCreateInfo.ppEnabledLayerNames = _validationLayers.data();
             populateDebugMessengerCreateInfo(debugUtilsMessengerCreateInfoExt);
             instanceCreateInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT *) &debugUtilsMessengerCreateInfoExt;
 
@@ -80,8 +81,8 @@ namespace Engine::RenderCore {
             instanceCreateInfo.pNext = nullptr;
         }
 
-        if (vkCreateInstance(&instanceCreateInfo, nullptr, &instance) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create instance!");
+        if (vkCreateInstance(&instanceCreateInfo, nullptr, &_instance) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create _instance!");
         }
 
     }
@@ -129,7 +130,7 @@ namespace Engine::RenderCore {
         vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
         std::vector<VkLayerProperties> supportlayerProperties(layerCount);
         vkEnumerateInstanceLayerProperties(&layerCount, supportlayerProperties.data());
-        for (auto &layer:validationLayers) {
+        for (auto &layer:_validationLayers) {
             bool trigger = false;
             for (auto &supportLayer: supportlayerProperties) {
                 if (std::string(layer) == supportLayer.layerName)
@@ -160,8 +161,8 @@ namespace Engine::RenderCore {
         if (!enableValidationLayers) return;
         VkDebugUtilsMessengerCreateInfoEXT createInfoExt;
         populateDebugMessengerCreateInfo(createInfoExt);
-        if (CreateDebugUtilsMessengerEXT(instance, &createInfoExt, nullptr,
-                                         &debugMessenger) != VK_SUCCESS) {
+        if (CreateDebugUtilsMessengerEXT(_instance, &createInfoExt, nullptr,
+                                         &_debugMessenger) != VK_SUCCESS) {
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }
@@ -196,11 +197,11 @@ namespace Engine::RenderCore {
     void Application::pickPhysicalDevice() {
         VkPhysicalDevice vkPhysicalDevice = VK_NULL_HANDLE;
         uint32_t deviceCount = 0;
-        vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+        vkEnumeratePhysicalDevices(_instance, &deviceCount, nullptr);
         if (deviceCount == 0)
             throw std::runtime_error("No physical _device!");
         std::vector<VkPhysicalDevice> vkPhysicalDevices(deviceCount);
-        vkEnumeratePhysicalDevices(instance, &deviceCount, vkPhysicalDevices.data());
+        vkEnumeratePhysicalDevices(_instance, &deviceCount, vkPhysicalDevices.data());
 
         for (const auto &device: vkPhysicalDevices) {
             if (isDeviceSuitable(device))
@@ -225,7 +226,7 @@ namespace Engine::RenderCore {
 
         bool swapChainAdequate = false;
         if (isExtensionsSupported) {
-            SwapChainSupportedDetails details = querySwapChainSupport(vkPhysicalDevice);
+            SwapChainHelper::SwapChainSupportedDetails details = querySwapChainSupport(vkPhysicalDevice);
             swapChainAdequate = !details.formats.empty()
                                 && !details.presentModes.empty();
         }
@@ -248,7 +249,7 @@ namespace Engine::RenderCore {
             if (qfp.queueCount > 0 && qfp.queueFlags & VK_QUEUE_GRAPHICS_BIT)
                 indices.graphicsFamily = i;
 
-            vkGetPhysicalDeviceSurfaceSupportKHR(vkPhysicalDevice, i, surface, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(vkPhysicalDevice, i, _surface, &presentSupport);
             if (qfp.queueCount > 0 && presentSupport)
                 indices.presentFamily = i;
 
@@ -280,11 +281,11 @@ namespace Engine::RenderCore {
         createInfo.queueCreateInfoCount = static_cast<uint32_t >(queueCreateInfos.size());
         createInfo.pQueueCreateInfos = queueCreateInfos.data();
         createInfo.pEnabledFeatures = &vkPhysicalDeviceFeatures;
-        createInfo.enabledExtensionCount = static_cast<uint32_t >(deviceExtensions.size());
-        createInfo.ppEnabledExtensionNames = deviceExtensions.data();
+        createInfo.enabledExtensionCount = static_cast<uint32_t >(_deviceExtensions.size());
+        createInfo.ppEnabledExtensionNames = _deviceExtensions.data();
         if (enableValidationLayers) {
-            createInfo.enabledLayerCount = static_cast<uint32_t > (validationLayers.size());
-            createInfo.ppEnabledLayerNames = validationLayers.data();
+            createInfo.enabledLayerCount = static_cast<uint32_t > (_validationLayers.size());
+            createInfo.ppEnabledLayerNames = _validationLayers.data();
         } else {
             createInfo.enabledLayerCount = 0;
         }
@@ -292,13 +293,13 @@ namespace Engine::RenderCore {
         if (vkCreateDevice(_physicalDevice, &createInfo, nullptr, &_device) != VK_SUCCESS) {
             throw std::runtime_error("failed to create logical _device!");
         }
-        vkGetDeviceQueue(_device, indices.graphicsFamily, 0, &graphicsQueue);
-        vkGetDeviceQueue(_device, indices.presentFamily, 0, &presentQueue);
+        vkGetDeviceQueue(_device, indices.graphicsFamily, 0, &_graphicsQueue);
+        vkGetDeviceQueue(_device, indices.presentFamily, 0, &_presentQueue);
     }
 
     void Application::createSurface() {
-        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create window surface!");
+        if (glfwCreateWindowSurface(_instance, _window, nullptr, &_surface) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create _window _surface!");
         }
     }
 
@@ -308,7 +309,7 @@ namespace Engine::RenderCore {
         std::vector<VkExtensionProperties> availableExtensions(extensionCount);
         vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.data());
 
-        std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
+        std::set<std::string> requiredExtensions(_deviceExtensions.begin(), _deviceExtensions.end());
 
         for (const auto &extension:availableExtensions) {
             requiredExtensions.erase(extension.extensionName);
@@ -317,32 +318,70 @@ namespace Engine::RenderCore {
     }
 
 
-    SwapChainSupportedDetails Application::querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice) {
-        SwapChainSupportedDetails details;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, surface, &details.capabilitiesKhr);
+    SwapChainHelper::SwapChainSupportedDetails Application::querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice) {
+        SwapChainHelper::SwapChainSupportedDetails details;
+        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, _surface, &details.capabilitiesKhr);
 
         uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, surface, &formatCount, nullptr);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, _surface, &formatCount, nullptr);
         if (formatCount != 0) {
             details.formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, surface, &formatCount, details.formats.data());
+            vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, _surface, &formatCount, details.formats.data());
         }
 
         uint32_t presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, surface, &presentModeCount, nullptr);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, _surface, &presentModeCount, nullptr);
         if (presentModeCount != 0) {
             details.presentModes.resize(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, surface, &presentModeCount,
+            vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, _surface, &presentModeCount,
                                                       details.presentModes.data());
         }
         return details;
     }
 
     void Application::createSwapChain() {
-        SwapChain::SwapChainSupportedDetails details = querySwapChainSupport(_physicalDevice);
-        VkSurfaceFormatKHR surfaceFormatKhr = SwapChain::chooseSwapSurfaceFormat(details.formats);
-        VkPresentModeKHR presentModeKhr = SwapChain::chooseSwapPresentMode(details.presentModes);
-        VkExtent2D extent2D = SwapChain::chooseSwapExtent(details.capabilitiesKhr);
+        SwapChainHelper::SwapChainSupportedDetails details = querySwapChainSupport(_physicalDevice);
+        VkSurfaceFormatKHR surfaceFormatKhr = SwapChainHelper::chooseSwapSurfaceFormat(details.formats);
+        VkPresentModeKHR presentModeKhr = SwapChainHelper::chooseSwapPresentMode(details.presentModes);
+        VkExtent2D extent2D = SwapChainHelper::chooseSwapExtent(details.capabilitiesKhr);
 
+        uint32_t imageCount = details.capabilitiesKhr.minImageCount + 1;
+        if (details.capabilitiesKhr.maxImageCount > 0
+            && imageCount > details.capabilitiesKhr.maxImageCount) {
+            imageCount = details.capabilitiesKhr.maxImageCount;
+        }
+
+        VkSwapchainCreateInfoKHR createInfoKhr = {};
+        createInfoKhr.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        createInfoKhr.surface = _surface;
+        createInfoKhr.minImageCount=imageCount;
+        createInfoKhr.imageFormat = surfaceFormatKhr.format;
+        createInfoKhr.imageColorSpace = surfaceFormatKhr.colorSpace;
+        createInfoKhr.imageExtent = extent2D;
+        createInfoKhr.imageArrayLayers = 1;
+        createInfoKhr.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+        QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
+        uint32_t queueFamilyIndices[] = {(uint32_t) indices.graphicsFamily,
+                                         (uint32_t) indices.presentFamily};
+        if (indices.graphicsFamily != indices.presentFamily) {
+            createInfoKhr.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+            createInfoKhr.queueFamilyIndexCount = 2;
+            createInfoKhr.pQueueFamilyIndices = queueFamilyIndices;
+        } else {
+            createInfoKhr.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            createInfoKhr.queueFamilyIndexCount = 0;
+            createInfoKhr.pQueueFamilyIndices = nullptr;
+        }
+        createInfoKhr.preTransform=details.capabilitiesKhr.currentTransform;
+        createInfoKhr.compositeAlpha=VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+        createInfoKhr.presentMode = presentModeKhr;
+        createInfoKhr.clipped = VK_TRUE;
+        createInfoKhr.oldSwapchain=VK_NULL_HANDLE;
+
+        if(vkCreateSwapchainKHR(_device,&createInfoKhr, nullptr,&_swapChain)!=VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to create swap chain");
+        }
     }
 }

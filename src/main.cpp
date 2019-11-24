@@ -3,7 +3,7 @@
 #include <iostream>
 
 int main(){
-    Application app;
+    Engine::RenderCore::Application app;
     try
     {
         app.run();
