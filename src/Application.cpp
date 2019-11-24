@@ -1,6 +1,7 @@
 #include <vector>
 #include <set>
 #include "Application.h"
+#include "Shader.h"
 
 namespace Engine::RenderCore {
 
@@ -28,6 +29,7 @@ namespace Engine::RenderCore {
         createLogicalDevice();
         createSwapChain();
         createImageViews();
+        createGraphicsPipelines();
     }
 
     void Application::mainLoop() {
@@ -387,7 +389,7 @@ namespace Engine::RenderCore {
             throw std::runtime_error("failed to create swap chain");
         }
 
-        vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, nullptr)
+        vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, nullptr);
         _swapChainImages.resize(imageCount);
         vkGetSwapchainImagesKHR(_device, _swapChain, &imageCount, _swapChainImages.data());
         _swapChainImageFormat = surfaceFormatKhr.format;
@@ -416,4 +418,34 @@ namespace Engine::RenderCore {
             }
         }
     }
+
+    void Application::createGraphicsPipelines() {
+        auto vertShaderCode = Shader::readFile("../../spv_shaders/vert.spv");
+        auto fragShaderCode = Shader::readFile("../../spv_shaders/frag.spv");
+        VkShaderModule vertModule = Shader::createShaderModule(_device, vertShaderCode);
+        VkShaderModule fragModule = Shader::createShaderModule(_device, fragShaderCode);
+
+        VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
+        vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        vertShaderStageCreateInfo.module = vertModule;
+        vertShaderStageCreateInfo.pName = "main";
+        vertShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
+        vertShaderStageCreateInfo.pSpecializationInfo = nullptr;
+
+        VkPipelineShaderStageCreateInfo fragShaderStageCreateInfo = {};
+        fragShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        fragShaderStageCreateInfo.module = fragModule;
+        fragShaderStageCreateInfo.pName = "main";
+        fragShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
+        fragShaderStageCreateInfo.pSpecializationInfo = nullptr;
+
+        VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageCreateInfo, fragShaderStageCreateInfo};
+
+        vkDestroyShaderModule(_device, vertModule, nullptr);
+        vkDestroyShaderModule(_device, fragModule, nullptr);
+
+
+    }
+
+
 }

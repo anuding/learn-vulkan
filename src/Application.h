@@ -96,5 +96,8 @@ namespace Engine::RenderCore {
         void createSwapChain();
 
         void createImageViews();
+
+        void createGraphicsPipelines();
+
     };
 }

@@ -358,3 +358,6 @@ MigrationBackup/
 # build files
 build/
 cmake-build-debug/
+
+# spir-v shaders
+*.spv
