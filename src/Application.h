@@ -42,6 +42,7 @@ namespace Engine::RenderCore {
         std::vector<VkImageView> _swapChainImageViews;
         VkFormat _swapChainImageFormat;
         VkExtent2D _swapChainExtent;
+        VkPipelineLayout _pipelineLayout;
 
         GLFWwindow *_window;
         VkInstance _instance;
