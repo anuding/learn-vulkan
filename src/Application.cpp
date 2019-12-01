@@ -602,7 +602,7 @@ namespace Engine::RenderCore {
         _swapChainFramebuffers.resize(_swapChainImageViews.size());
         for (size_t i = 0; i < _swapChainImageViews.size(); i++) {
             VkImageView attachments[] = {
-                    _swapChainImageViews[i];
+                    _swapChainImageViews[i]
             };
 
             VkFramebufferCreateInfo framebufferCreateInfo = {};
