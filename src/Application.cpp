@@ -31,6 +31,7 @@ namespace Engine::RenderCore {
         createImageViews();
         createRenderPass();
         createGraphicsPipelines();
+        createFramebuffers();
     }
 
     void Application::mainLoop() {
@@ -41,7 +42,10 @@ namespace Engine::RenderCore {
 
     void Application::cleanUp() {
 
-        vkDestroyPipeline(_device,_graphicsPipeline, nullptr);
+        for (auto framebuffer: _swapChainFramebuffers) {
+            vkDestroyFramebuffer(_device, framebuffer, nullptr);
+        }
+        vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
         vkDestroyRenderPass(_device, _renderPass, nullptr);
         for (auto imageView: _swapChainImageViews) {
@@ -591,6 +595,29 @@ namespace Engine::RenderCore {
 
         if (vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &_renderPass) != VK_SUCCESS) {
             throw std::runtime_error("failed to create render pass");
+        }
+    }
+
+    void Application::createFramebuffers() {
+        _swapChainFramebuffers.resize(_swapChainImageViews.size());
+        for (size_t i = 0; i < _swapChainImageViews.size(); i++) {
+            VkImageView attachments[] = {
+                    _swapChainImageViews[i];
+            };
+
+            VkFramebufferCreateInfo framebufferCreateInfo = {};
+            framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+            framebufferCreateInfo.renderPass = _renderPass;
+            framebufferCreateInfo.pAttachments = attachments;
+            framebufferCreateInfo.attachmentCount = 1;
+            framebufferCreateInfo.width = _swapChainExtent.width;
+            framebufferCreateInfo.height = _swapChainExtent.height;
+            framebufferCreateInfo.layers = 1;
+
+            if (vkCreateFramebuffer(_device, &framebufferCreateInfo, nullptr, &_swapChainFramebuffers[i]) !=
+                VK_SUCCESS) {
+                throw std::runtime_error("failed to create framebuffer");
+            }
         }
     }
 
