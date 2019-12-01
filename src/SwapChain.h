@@ -8,18 +8,18 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-struct SwapChainSupportdDetails{
-    VkSurfaceCapabilitiesKHR capabilitiesKhr;
-    std::vector<VkSurfaceFormatKHR> formats;
-    std::vector<VkPresentModeKHR> presentModes;
-};
+namespace Engine::RenderCore {
+    namespace SwapChainHelper {
+        struct SwapChainSupportedDetails {
+            VkSurfaceCapabilitiesKHR capabilitiesKhr;
+            std::vector<VkSurfaceFormatKHR> formats;
+            std::vector<VkPresentModeKHR> presentModes;
+        };
 
-class SwapChain {
-public:
-    VkSurfaceKHR surface;
+        VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
+        VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
+        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
 
-    VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
-};
-
-
+    }
 #endif //ENGINE_SWAPCHAIN_H
+}
