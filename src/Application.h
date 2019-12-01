@@ -46,6 +46,8 @@ namespace Engine::RenderCore {
         VkPipelineLayout _pipelineLayout;
         VkPipeline  _graphicsPipeline;
         std::vector<VkFramebuffer > _swapChainFramebuffers;
+        VkCommandPool _commandPool;
+        std::vector<VkCommandBuffer > _commandBuffers;
 
         GLFWwindow *_window;
         VkInstance _instance;
@@ -106,5 +108,9 @@ namespace Engine::RenderCore {
         void createRenderPass();
 
         void createFramebuffers();
+
+        void createCommandPool();
+
+        void createCommandBuffers();
     };
 }

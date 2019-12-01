@@ -32,6 +32,8 @@ namespace Engine::RenderCore {
         createRenderPass();
         createGraphicsPipelines();
         createFramebuffers();
+        createCommandPool();
+        createCommandBuffers();
     }
 
     void Application::mainLoop() {
@@ -41,7 +43,7 @@ namespace Engine::RenderCore {
     }
 
     void Application::cleanUp() {
-
+        vkDestroyCommandPool(_device, _commandPool, nullptr);
         for (auto framebuffer: _swapChainFramebuffers) {
             vkDestroyFramebuffer(_device, framebuffer, nullptr);
         }
@@ -619,6 +621,32 @@ namespace Engine::RenderCore {
                 throw std::runtime_error("failed to create framebuffer");
             }
         }
+    }
+
+    void Application::createCommandPool() {
+        QueueFamilyIndices queueFamilyIndices = findQueueFamilies(_physicalDevice);
+        VkCommandPoolCreateInfo commandPoolCreateInfo = {};
+        commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+        commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
+        commandPoolCreateInfo.flags = 0;
+
+        if (vkCreateCommandPool(_device, &commandPoolCreateInfo, nullptr, &_commandPool) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create command pool");
+        }
+    }
+
+    void Application::createCommandBuffers() {
+        _commandBuffers.resize(_swapChainFramebuffers.size());
+        VkCommandBufferAllocateInfo commandBufferAllocateInfo ={};
+        commandBufferAllocateInfo.sType=VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        commandBufferAllocateInfo.commandPool=_commandPool;
+        commandBufferAllocateInfo.commandBufferCount=(uint32_t)_commandBuffers.size();
+        commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+
+        if(vkAllocateCommandBuffers(_device, &commandBufferAllocateInfo,_commandBuffers.data())!=VK_SUCCESS){
+            throw std::runtime_error("failed to create command buffers");
+        }
+
     }
 
 }
