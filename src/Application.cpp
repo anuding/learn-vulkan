@@ -56,7 +56,7 @@ namespace Engine::RenderCore {
         glfwDestroyWindow(_window);
         glfwTerminate();
     }
-
+//test
     void Application::createInstance() {
         if (enableValidationLayers)
             checkValidationLayerSupport();
