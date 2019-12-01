@@ -41,6 +41,7 @@ namespace Engine::RenderCore {
 
     void Application::cleanUp() {
 
+        vkDestroyPipeline(_device,_graphicsPipeline, nullptr);
         vkDestroyPipelineLayout(_device, _pipelineLayout, nullptr);
         vkDestroyRenderPass(_device, _renderPass, nullptr);
         for (auto imageView: _swapChainImageViews) {
@@ -56,7 +57,7 @@ namespace Engine::RenderCore {
         glfwDestroyWindow(_window);
         glfwTerminate();
     }
-//test
+
     void Application::createInstance() {
         if (enableValidationLayers)
             checkValidationLayerSupport();
@@ -530,6 +531,31 @@ namespace Engine::RenderCore {
         if (vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &_pipelineLayout) != VK_SUCCESS) {
             throw std::runtime_error("failed to create pipelinelayout");
         }
+
+        VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
+        pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
+        pipelineCreateInfo.renderPass = _renderPass;
+        pipelineCreateInfo.stageCount = 2;
+        pipelineCreateInfo.pStages = shaderStages;
+        pipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
+        pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
+        pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
+        pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
+        pipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
+        pipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
+        pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
+        pipelineCreateInfo.pDynamicState = nullptr;
+        pipelineCreateInfo.layout = _pipelineLayout;
+        pipelineCreateInfo.renderPass = _renderPass;
+        pipelineCreateInfo.subpass = 0;
+        pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
+        pipelineCreateInfo.basePipelineIndex = -1;
+
+        if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &_graphicsPipeline) !=
+            VK_SUCCESS) {
+            throw std::runtime_error("failed to create pipeline");
+        }
+
         vkDestroyShaderModule(_device, vertModule, nullptr);
         vkDestroyShaderModule(_device, fragModule, nullptr);
 
@@ -538,6 +564,7 @@ namespace Engine::RenderCore {
 
     void Application::createRenderPass() {
         VkAttachmentDescription colorAttachment = {};
+        colorAttachment.format = _swapChainImageFormat;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;

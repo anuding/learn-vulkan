@@ -44,7 +44,7 @@ namespace Engine::RenderCore {
         VkExtent2D _swapChainExtent;
         VkRenderPass _renderPass;
         VkPipelineLayout _pipelineLayout;
-
+        VkPipeline  _graphicsPipeline;
         GLFWwindow *_window;
         VkInstance _instance;
     public:
