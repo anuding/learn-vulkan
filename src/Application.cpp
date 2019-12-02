@@ -34,15 +34,20 @@ namespace Engine::RenderCore {
         createFramebuffers();
         createCommandPool();
         createCommandBuffers();
+        createSemaphores();
     }
 
     void Application::mainLoop() {
         while (!glfwWindowShouldClose(_window)) {
             glfwPollEvents();
+            drawFrame();
         }
     }
 
     void Application::cleanUp() {
+        vkDestroySemaphore(_device,_imageAvailableSemaphore, nullptr);
+        vkDestroySemaphore(_device,_renderFinishedSemaphore, nullptr);
+
         vkDestroyCommandPool(_device, _commandPool, nullptr);
         for (auto framebuffer: _swapChainFramebuffers) {
             vkDestroyFramebuffer(_device, framebuffer, nullptr);
@@ -667,14 +672,26 @@ namespace Engine::RenderCore {
             if (vkBeginCommandBuffer(_commandBuffers[i], &beginInfo) != VK_SUCCESS) {
                 throw std::runtime_error("failed to begin");
             }
-            vkCmdBeginRenderPass(_commandBuffers[i],&renderPassBeginInfo,VK_SUBPASS_CONTENTS_INLINE);
-            vkCmdBindPipeline(_commandBuffers[i],VK_PIPELINE_BIND_POINT_GRAPHICS,_graphicsPipeline);
-            vkCmdDraw(_commandBuffers[i],3,1,0,0);
+            vkCmdBeginRenderPass(_commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+            vkCmdBindPipeline(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
+            vkCmdDraw(_commandBuffers[i], 3, 1, 0, 0);
             vkCmdEndRenderPass(_commandBuffers[i]);
-            if(vkEndCommandBuffer(_commandBuffers[i])!=VK_SUCCESS)
-            {
+            if (vkEndCommandBuffer(_commandBuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to record command buffer");
             }
+        }
+    }
+
+    void Application::drawFrame() {
+
+    }
+
+    void Application::createSemaphores() {
+        VkSemaphoreCreateInfo semaphoreCreateInfo = {};
+        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_EXPORT_SEMAPHORE_CREATE_INFO;
+        if (vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_imageAvailableSemaphore) != VK_SUCCESS ||
+            vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_renderFinishedSemaphore) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create semaphores");
         }
     }
 

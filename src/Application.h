@@ -48,6 +48,8 @@ namespace Engine::RenderCore {
         std::vector<VkFramebuffer > _swapChainFramebuffers;
         VkCommandPool _commandPool;
         std::vector<VkCommandBuffer > _commandBuffers;
+        VkSemaphore _imageAvailableSemaphore;
+        VkSemaphore _renderFinishedSemaphore;
 
         GLFWwindow *_window;
         VkInstance _instance;
@@ -112,5 +114,9 @@ namespace Engine::RenderCore {
         void createCommandPool();
 
         void createCommandBuffers();
+
+        void drawFrame();
+
+        void createSemaphores();
     };
 }
