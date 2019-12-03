@@ -683,7 +683,25 @@ namespace Engine::RenderCore {
     }
 
     void Application::drawFrame() {
+        uint32_t imageIndex;
+        vkAcquireNextImageKHR(_device,_swapChain,std::numeric_limits<uint64_t>::max(),_imageAvailableSemaphore,VK_NULL_HANDLE,&imageIndex);
 
+        VkSubmitInfo submitInfo = {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        VkSemaphore waitSemaphores[] = {_imageAvailableSemaphore};
+        VkPipelineStageFlags waitStages[]={VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &_commandBuffers[imageIndex];
+        VkSemaphore signalSemaphores[]={_renderFinishedSemaphore};
+        submitInfo.signalSemaphoreCount=1;
+        submitInfo.pSignalSemaphores=signalSemaphores;
+        if(vkQueueSubmit(_graphicsQueue,1,&submitInfo,VK_NULL_HANDLE)!=VK_SUCCESS)
+        {
+            throw std::runtime_error("failed to submit draw command");
+        }
     }
 
     void Application::createSemaphores() {
