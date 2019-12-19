@@ -42,6 +42,7 @@ namespace Engine::RenderCore {
             glfwPollEvents();
             drawFrame();
         }
+        vkDeviceWaitIdle(_device);
     }
 
     void Application::cleanUp() {
