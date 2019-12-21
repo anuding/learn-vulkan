@@ -34,7 +34,7 @@ namespace Engine::RenderCore {
         createFramebuffers();
         createCommandPool();
         createCommandBuffers();
-        createSemaphores();
+        createSyncObjects();
     }
 
     void Application::mainLoop() {
@@ -46,8 +46,11 @@ namespace Engine::RenderCore {
     }
 
     void Application::cleanUp() {
-        vkDestroySemaphore(_device, _imageAvailableSemaphore, nullptr);
-        vkDestroySemaphore(_device, _renderFinishedSemaphore, nullptr);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(_device, _imageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(_device, _inFlightFences[i], nullptr);
+        }
 
         vkDestroyCommandPool(_device, _commandPool, nullptr);
         for (auto framebuffer: _swapChainFramebuffers) {
@@ -695,23 +698,26 @@ namespace Engine::RenderCore {
     }
 
     void Application::drawFrame() {
+        vkWaitForFences(_device,1,&_inFlightFences[_currentFrame],VK_TRUE,std::numeric_limits<uint64_t>::max());
+        vkResetFences(_device,1,&_inFlightFences[_currentFrame]);
         uint32_t imageIndex;
-        vkAcquireNextImageKHR(_device, _swapChain, std::numeric_limits<uint64_t>::max(), _imageAvailableSemaphore,
+        vkAcquireNextImageKHR(_device, _swapChain, std::numeric_limits<uint64_t>::max(),
+                              _imageAvailableSemaphores[_currentFrame],
                               VK_NULL_HANDLE, &imageIndex);
 
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        VkSemaphore waitSemaphores[] = {_imageAvailableSemaphore};
+        VkSemaphore waitSemaphores[] = {_imageAvailableSemaphores[_currentFrame]};
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &_commandBuffers[imageIndex];
-        VkSemaphore signalSemaphores[] = {_renderFinishedSemaphore};
+        VkSemaphore signalSemaphores[] = {_renderFinishedSemaphores[_currentFrame]};
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
-        if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+        if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, _inFlightFences[_currentFrame]) != VK_SUCCESS) {
             throw std::runtime_error("failed to submit draw command");
         }
 
@@ -726,15 +732,27 @@ namespace Engine::RenderCore {
         presentInfoKhr.pImageIndices = &imageIndex;
         presentInfoKhr.pResults = nullptr;
         vkQueuePresentKHR(_graphicsQueue, &presentInfoKhr);
-
+        _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    void Application::createSemaphores() {
+    void Application::createSyncObjects() {
+        _imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        _renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
+        _inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
         VkSemaphoreCreateInfo semaphoreCreateInfo = {};
         semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        if (vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_imageAvailableSemaphore) != VK_SUCCESS ||
-            vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_renderFinishedSemaphore) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create semaphores");
+        VkFenceCreateInfo fenceCreateInfo = {};
+        fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fenceCreateInfo.flags=VK_FENCE_CREATE_SIGNALED_BIT;
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            if (vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_imageAvailableSemaphores[i]) !=
+                VK_SUCCESS ||
+                vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_renderFinishedSemaphores[i]) !=
+                VK_SUCCESS ||
+                vkCreateFence(_device, &fenceCreateInfo, nullptr, &_inFlightFences[i]) !=
+                VK_SUCCESS) {
+                throw std::runtime_error("failed to create semaphores");
+            }
         }
     }
 
