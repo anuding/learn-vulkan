@@ -1,12 +1,13 @@
-ADD_LIBRARY(Application Application.cpp)
-ADD_LIBRARY(swapchain_helper SwapChain.cpp)
-ADD_LIBRARY(shader_helper Shader.cpp)
+ADD_LIBRARY(Application
+		Application.cpp
+		Semaphore.cpp
+		Pipeline.cpp
+		SwapChain.cpp
+		Shader.cpp )
 
 ADD_EXECUTABLE(engine main.cpp)
 
 TARGET_LINK_LIBRARIES(engine Application)
-TARGET_LINK_LIBRARIES(engine swapchain_helper)
-TARGET_LINK_LIBRARIES(engine shader_helper)
 
 IF(UNIX)
 	MESSAGE(STATUS "Current platform: UNIX ")
