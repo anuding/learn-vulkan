@@ -6,6 +6,7 @@
 #include "Pipeline.h"
 #include "RenderPass.h"
 #include "FrameBuffer.h"
+#include "CommandBuffer.h"
 
 
 namespace Engine::RenderCore {
@@ -34,12 +35,17 @@ namespace Engine::RenderCore {
         createLogicalDevice();
         createSwapChain();
         createImageViews();
-        createRenderPass();
-        createGraphicsPipelines();
-        createFrameBuffers();
-        createCommandPool();
-        createCommandBuffers();
-        createSyncObjects();
+        RenderPassHelper::createRenderPass(_device, _swapChainImageFormat, _renderPass);
+        PipelineHelper::createGraphicsPipelines(_device, _swapChainExtent, _pipelineLayout, _renderPass,
+                                                _graphicsPipeline);
+        FrameBufferHelper::createFrameBuffers(_device, _swapChainFrameBuffers, _swapChainImageViews, _renderPass,
+                                              _swapChainExtent);
+        CommandHelper::createCommandPool(_physicalDevice, _device, _commandPool,
+                                         _surface);
+        CommandHelper::createCommandBuffers(_device, _commandBuffers, _swapChainFrameBuffers, _commandPool,
+                                            _renderPass, _swapChainExtent, _graphicsPipeline);
+        SemaphoreHelper::createSyncObjects(_device, _imageAvailableSemaphores, _renderFinishedSemaphores,
+                                           _inFlightFences, MAX_FRAMES_IN_FLIGHT);
     }
 
     void Application::mainLoop() {
@@ -254,7 +260,7 @@ namespace Engine::RenderCore {
     }
 
     bool Application::isDeviceSuitable(VkPhysicalDevice vkPhysicalDevice) {
-        QueueFamilyIndices indices = findQueueFamilies(vkPhysicalDevice);
+        Queue::QueueFamilyIndices indices = Queue::findQueueFamilies(vkPhysicalDevice, _surface);
         bool isExtensionsSupported = checkPhysicalDeviceExtensionSupport(vkPhysicalDevice);
 
         bool swapChainAdequate = false;
@@ -264,38 +270,14 @@ namespace Engine::RenderCore {
             swapChainAdequate = !details.formats.empty()
                                 && !details.presentModes.empty();
         }
-        return findQueueFamilies(vkPhysicalDevice).isComplete()
+        return Queue::findQueueFamilies(vkPhysicalDevice, _surface).isComplete()
                && isExtensionsSupported
                && swapChainAdequate;
     }
 
-    QueueFamilyIndices Application::findQueueFamilies(VkPhysicalDevice vkPhysicalDevice) {
-        QueueFamilyIndices indices;
-
-        uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyCount, nullptr);
-        std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyCount, queueFamilyProperties.data());
-
-        VkBool32 presentSupport = false;
-        int i = 0;
-        for (auto &qfp: queueFamilyProperties) {
-            if (qfp.queueCount > 0 && qfp.queueFlags & VK_QUEUE_GRAPHICS_BIT)
-                indices.graphicsFamily = i;
-
-            vkGetPhysicalDeviceSurfaceSupportKHR(vkPhysicalDevice, i, _surface, &presentSupport);
-            if (qfp.queueCount > 0 && presentSupport)
-                indices.presentFamily = i;
-
-            if (indices.isComplete())
-                break;
-            i++;
-        }
-        return indices;
-    }
 
     void Application::createLogicalDevice() {
-        QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
+        Queue::QueueFamilyIndices indices = Queue::findQueueFamilies(_physicalDevice, _surface);
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
         std::set<int> uniqueQueueFamilies = {indices.graphicsFamily, indices.presentFamily};
 
@@ -375,7 +357,7 @@ namespace Engine::RenderCore {
         createInfoKhr.imageArrayLayers = 1;
         createInfoKhr.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        QueueFamilyIndices indices = findQueueFamilies(_physicalDevice);
+        Queue::QueueFamilyIndices indices = Queue::findQueueFamilies(_physicalDevice, _surface);
         uint32_t queueFamilyIndices[] = {(uint32_t) indices.graphicsFamily,
                                          (uint32_t) indices.presentFamily};
         if (indices.graphicsFamily != indices.presentFamily) {
@@ -427,70 +409,6 @@ namespace Engine::RenderCore {
         }
     }
 
-    void Application::createGraphicsPipelines() {
-        PipelineHelper::createGraphicsPipelines(_device, _swapChainExtent, _pipelineLayout, _renderPass,
-                                                _graphicsPipeline);
-    }
-
-    void Application::createFrameBuffers() {
-        FrameBufferHelper::createFrameBuffers(_device, _swapChainFrameBuffers, _swapChainImageViews, _renderPass,
-                                              _swapChainExtent);
-    }
-
-    void Application::createCommandPool() {
-        QueueFamilyIndices queueFamilyIndices = findQueueFamilies(_physicalDevice);
-        VkCommandPoolCreateInfo commandPoolCreateInfo = {};
-        commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
-        commandPoolCreateInfo.flags = 0;
-
-        if (vkCreateCommandPool(_device, &commandPoolCreateInfo, nullptr, &_commandPool) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create command pool");
-        }
-    }
-
-    void Application::createCommandBuffers() {
-        _commandBuffers.resize(_swapChainFrameBuffers.size());
-        VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
-        commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        commandBufferAllocateInfo.commandPool = _commandPool;
-        commandBufferAllocateInfo.commandBufferCount = (uint32_t) _commandBuffers.size();
-        commandBufferAllocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-        if (vkAllocateCommandBuffers(_device, &commandBufferAllocateInfo, _commandBuffers.data()) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create command buffers");
-        }
-
-        for (size_t i = 0; i < _commandBuffers.size(); i++) {
-            VkCommandBufferBeginInfo beginInfo = {};
-            beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-            beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
-            beginInfo.pInheritanceInfo = nullptr;
-
-            VkRenderPassBeginInfo renderPassBeginInfo = {};
-            renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            renderPassBeginInfo.renderPass = _renderPass;
-            renderPassBeginInfo.clearValueCount = 1;
-            renderPassBeginInfo.framebuffer = _swapChainFrameBuffers[i];
-            renderPassBeginInfo.renderArea.offset = {0, 0};
-            renderPassBeginInfo.renderArea.extent = _swapChainExtent;
-            VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
-            renderPassBeginInfo.pClearValues = &clearValue;
-
-
-            if (vkBeginCommandBuffer(_commandBuffers[i], &beginInfo) != VK_SUCCESS) {
-                throw std::runtime_error("failed to begin");
-            }
-            vkCmdBeginRenderPass(_commandBuffers[i], &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-            vkCmdBindPipeline(_commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, _graphicsPipeline);
-            vkCmdDraw(_commandBuffers[i], 3, 1, 0, 0);
-            vkCmdEndRenderPass(_commandBuffers[i]);
-            if (vkEndCommandBuffer(_commandBuffers[i]) != VK_SUCCESS) {
-                throw std::runtime_error("failed to record command buffer");
-            }
-        }
-    }
-
     void Application::drawFrame() {
         vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
         vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
@@ -528,15 +446,4 @@ namespace Engine::RenderCore {
         vkQueuePresentKHR(_graphicsQueue, &presentInfoKhr);
         _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
-
-    void Application::createRenderPass() {
-        RenderPassHelper::createRenderPass(_device, _swapChainImageFormat, _renderPass);
-    }
-
-    void Application::createSyncObjects() {
-        SemaphoreHelper::createSyncObjects(_device, _imageAvailableSemaphores, _renderFinishedSemaphores,
-                                           _inFlightFences, MAX_FRAMES_IN_FLIGHT);
-    }
-
-
 }

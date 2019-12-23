@@ -9,18 +9,8 @@ const bool enableValidationLayers = true;
 #include <iostream>
 #include <vector>
 #include "SwapChain.h"
-
+#include "Queue.h"
 namespace Engine::RenderCore {
-    struct QueueFamilyIndices {
-        int graphicsFamily = -1;
-        int presentFamily = -1;
-
-        bool isComplete() {
-            return graphicsFamily >= 0 && presentFamily >= 0;
-        }
-    };
-
-
     class Application {
     private:
         const uint32_t WIDTH = 800;
@@ -94,8 +84,6 @@ namespace Engine::RenderCore {
         void checkPhysicalDeviceSupport(std::vector<VkPhysicalDevice> &vkPhysicalDevices);
 
         bool isDeviceSuitable(VkPhysicalDevice vkPhysicalDevice);
-
-        QueueFamilyIndices findQueueFamilies(VkPhysicalDevice vkPhysicalDevice);
 
         void createLogicalDevice();
 
