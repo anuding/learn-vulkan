@@ -25,6 +25,8 @@ namespace Engine::RenderCore {
     private:
         const uint32_t WIDTH = 800;
         const uint32_t HEIGHT = 600;
+        const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+
         const std::vector<const char *> _validationLayers = {
                 "VK_LAYER_KHRONOS_validation"
         };
@@ -45,12 +47,14 @@ namespace Engine::RenderCore {
         VkRenderPass _renderPass;
         VkPipelineLayout _pipelineLayout;
         VkPipeline  _graphicsPipeline;
-        std::vector<VkFramebuffer > _swapChainFramebuffers;
+        std::vector<VkFramebuffer > _swapChainFrameBuffers;
         VkCommandPool _commandPool;
         std::vector<VkCommandBuffer > _commandBuffers;
-        VkSemaphore _imageAvailableSemaphore;
-        VkSemaphore _renderFinishedSemaphore;
 
+        std::vector<VkSemaphore > _imageAvailableSemaphores;
+        std::vector<VkSemaphore > _renderFinishedSemaphores;
+        size_t _currentFrame = 0;
+        std::vector<VkFence > _inFlightFences;
         GLFWwindow *_window;
         VkInstance _instance;
     public:
@@ -99,8 +103,6 @@ namespace Engine::RenderCore {
 
         bool checkPhysicalDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
 
-        SwapChainHelper::SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice);
-
         void createSwapChain();
 
         void createImageViews();
@@ -109,7 +111,7 @@ namespace Engine::RenderCore {
 
         void createRenderPass();
 
-        void createFramebuffers();
+        void createFrameBuffers();
 
         void createCommandPool();
 
@@ -117,6 +119,6 @@ namespace Engine::RenderCore {
 
         void drawFrame();
 
-        void createSemaphores();
+        void createSyncObjects();
     };
 }

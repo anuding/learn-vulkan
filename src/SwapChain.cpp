@@ -48,6 +48,27 @@ namespace Engine::RenderCore {
                 return actualExtent;
             }
         }
+
+        SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice &vkPhysicalDevice, VkSurfaceKHR surfaceKhr) {
+            SwapChainSupportedDetails details;
+            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, surfaceKhr, &details.capabilitiesKhr);
+
+            uint32_t formatCount;
+            vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, surfaceKhr, &formatCount, nullptr);
+            if (formatCount != 0) {
+                details.formats.resize(formatCount);
+                vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, surfaceKhr, &formatCount, details.formats.data());
+            }
+
+            uint32_t presentModeCount;
+            vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, surfaceKhr, &presentModeCount, nullptr);
+            if (presentModeCount != 0) {
+                details.presentModes.resize(presentModeCount);
+                vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, surfaceKhr, &presentModeCount,
+                                                          details.presentModes.data());
+            }
+            return details;
+        }
     }
 
 }

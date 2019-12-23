@@ -2,6 +2,11 @@
 #include <set>
 #include "Application.h"
 #include "Shader.h"
+#include "Semaphore.h"
+#include "Pipeline.h"
+#include "RenderPass.h"
+#include "FrameBuffer.h"
+
 
 namespace Engine::RenderCore {
 
@@ -31,10 +36,10 @@ namespace Engine::RenderCore {
         createImageViews();
         createRenderPass();
         createGraphicsPipelines();
-        createFramebuffers();
+        createFrameBuffers();
         createCommandPool();
         createCommandBuffers();
-        createSemaphores();
+        createSyncObjects();
     }
 
     void Application::mainLoop() {
@@ -46,11 +51,14 @@ namespace Engine::RenderCore {
     }
 
     void Application::cleanUp() {
-        vkDestroySemaphore(_device, _imageAvailableSemaphore, nullptr);
-        vkDestroySemaphore(_device, _renderFinishedSemaphore, nullptr);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            vkDestroySemaphore(_device, _renderFinishedSemaphores[i], nullptr);
+            vkDestroySemaphore(_device, _imageAvailableSemaphores[i], nullptr);
+            vkDestroyFence(_device, _inFlightFences[i], nullptr);
+        }
 
         vkDestroyCommandPool(_device, _commandPool, nullptr);
-        for (auto framebuffer: _swapChainFramebuffers) {
+        for (auto framebuffer: _swapChainFrameBuffers) {
             vkDestroyFramebuffer(_device, framebuffer, nullptr);
         }
         vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
@@ -59,7 +67,9 @@ namespace Engine::RenderCore {
         for (auto imageView: _swapChainImageViews) {
             vkDestroyImageView(_device, imageView, nullptr);
         }
+
         vkDestroySwapchainKHR(_device, _swapChain, nullptr);
+        //this is a red line
         vkDestroyDevice(_device, nullptr);
         if (enableValidationLayers)
             DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
@@ -249,7 +259,8 @@ namespace Engine::RenderCore {
 
         bool swapChainAdequate = false;
         if (isExtensionsSupported) {
-            SwapChainHelper::SwapChainSupportedDetails details = querySwapChainSupport(vkPhysicalDevice);
+            SwapChainHelper::SwapChainSupportedDetails details = SwapChainHelper::querySwapChainSupport(
+                    vkPhysicalDevice, _surface);
             swapChainAdequate = !details.formats.empty()
                                 && !details.presentModes.empty();
         }
@@ -341,29 +352,9 @@ namespace Engine::RenderCore {
     }
 
 
-    SwapChainHelper::SwapChainSupportedDetails Application::querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice) {
-        SwapChainHelper::SwapChainSupportedDetails details;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, _surface, &details.capabilitiesKhr);
-
-        uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, _surface, &formatCount, nullptr);
-        if (formatCount != 0) {
-            details.formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, _surface, &formatCount, details.formats.data());
-        }
-
-        uint32_t presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, _surface, &presentModeCount, nullptr);
-        if (presentModeCount != 0) {
-            details.presentModes.resize(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, _surface, &presentModeCount,
-                                                      details.presentModes.data());
-        }
-        return details;
-    }
-
     void Application::createSwapChain() {
-        SwapChainHelper::SwapChainSupportedDetails details = querySwapChainSupport(_physicalDevice);
+        SwapChainHelper::SwapChainSupportedDetails details = SwapChainHelper::querySwapChainSupport(_physicalDevice,
+                                                                                                    _surface);
         VkSurfaceFormatKHR surfaceFormatKhr = SwapChainHelper::chooseSwapSurfaceFormat(details.formats);
         VkPresentModeKHR presentModeKhr = SwapChainHelper::chooseSwapPresentMode(details.presentModes);
         VkExtent2D extent2D = SwapChainHelper::chooseSwapExtent(details.capabilitiesKhr);
@@ -437,207 +428,13 @@ namespace Engine::RenderCore {
     }
 
     void Application::createGraphicsPipelines() {
-        auto vertShaderCode = Shader::readFile("../../spv_shaders/vert.spv");
-        auto fragShaderCode = Shader::readFile("../../spv_shaders/frag.spv");
-        VkShaderModule vertModule = Shader::createShaderModule(_device, vertShaderCode);
-        VkShaderModule fragModule = Shader::createShaderModule(_device, fragShaderCode);
-
-        VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
-        vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        vertShaderStageCreateInfo.module = vertModule;
-        vertShaderStageCreateInfo.pName = "main";
-        vertShaderStageCreateInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-        vertShaderStageCreateInfo.pSpecializationInfo = nullptr;
-
-        VkPipelineShaderStageCreateInfo fragShaderStageCreateInfo = {};
-        fragShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        fragShaderStageCreateInfo.module = fragModule;
-        fragShaderStageCreateInfo.pName = "main";
-        fragShaderStageCreateInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        fragShaderStageCreateInfo.pSpecializationInfo = nullptr;
-
-        VkPipelineShaderStageCreateInfo shaderStages[] = {vertShaderStageCreateInfo, fragShaderStageCreateInfo};
-
-//        Fixed Functions
-        VkPipelineVertexInputStateCreateInfo vertexInputStateCreateInfo = {};
-        vertexInputStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputStateCreateInfo.vertexBindingDescriptionCount = 0;
-        vertexInputStateCreateInfo.pVertexBindingDescriptions = nullptr;
-        vertexInputStateCreateInfo.vertexAttributeDescriptionCount = 0;
-        vertexInputStateCreateInfo.pVertexAttributeDescriptions = nullptr;
-
-        VkPipelineInputAssemblyStateCreateInfo inputAssemblyStateCreateInfo = {};
-        inputAssemblyStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-        inputAssemblyStateCreateInfo.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-        inputAssemblyStateCreateInfo.primitiveRestartEnable = VK_FALSE;
-
-
-        VkViewport viewport = {};
-        viewport.x = 0.0f;
-        viewport.y = 0.0f;
-        viewport.width = (float) _swapChainExtent.width;
-        viewport.height = (float) _swapChainExtent.height;
-        viewport.minDepth = 0.0f;
-        viewport.maxDepth = 1.0f;
-
-
-        VkRect2D scissor = {};
-        scissor.extent = _swapChainExtent;
-        scissor.offset = {0, 0};
-
-        VkPipelineViewportStateCreateInfo viewportStateCreateInfo = {};
-        viewportStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-        viewportStateCreateInfo.pScissors = &scissor;
-        viewportStateCreateInfo.pViewports = &viewport;
-        viewportStateCreateInfo.scissorCount = 1;
-        viewportStateCreateInfo.viewportCount = 1;
-
-        VkPipelineRasterizationStateCreateInfo rasterizationStateCreateInfo = {};
-        rasterizationStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-        rasterizationStateCreateInfo.depthClampEnable = VK_FALSE;
-        rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
-        rasterizationStateCreateInfo.lineWidth = 1.0f;
-        rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
-        rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
-        rasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f; // Optional
-        rasterizationStateCreateInfo.depthBiasClamp = 0.0f; // Optional
-        rasterizationStateCreateInfo.depthBiasSlopeFactor = 0.0f; // Optional
-
-        VkPipelineMultisampleStateCreateInfo multisampleStateCreateInfo = {};
-        multisampleStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-        multisampleStateCreateInfo.sampleShadingEnable = VK_FALSE;
-        multisampleStateCreateInfo.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-        multisampleStateCreateInfo.minSampleShading = 1.0f;
-        multisampleStateCreateInfo.pSampleMask = nullptr;
-        multisampleStateCreateInfo.alphaToCoverageEnable = VK_FALSE;
-        multisampleStateCreateInfo.alphaToOneEnable = VK_FALSE;
-
-
-        VkPipelineDepthStencilStateCreateInfo depthStencilStateCreateInfo = {};
-
-        VkPipelineColorBlendAttachmentState colorBlendAttachmentState = {};
-        colorBlendAttachmentState.colorWriteMask =
-                VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT |
-                VK_COLOR_COMPONENT_A_BIT;
-        colorBlendAttachmentState.blendEnable = VK_FALSE;
-
-        VkPipelineColorBlendStateCreateInfo colorBlendStateCreateInfo = {};
-        colorBlendStateCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-        colorBlendStateCreateInfo.logicOpEnable = VK_FALSE;
-        colorBlendStateCreateInfo.logicOp = VK_LOGIC_OP_COPY;
-        colorBlendStateCreateInfo.attachmentCount = 1;
-        colorBlendStateCreateInfo.pAttachments = &colorBlendAttachmentState;
-        colorBlendStateCreateInfo.blendConstants[0] = 0.0f;
-        colorBlendStateCreateInfo.blendConstants[1] = 0.0f;
-        colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
-        colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
-
-        VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
-        pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCreateInfo.setLayoutCount = 0;
-        pipelineLayoutCreateInfo.pSetLayouts = nullptr;
-        pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
-        pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
-
-        if (vkCreatePipelineLayout(_device, &pipelineLayoutCreateInfo, nullptr, &_pipelineLayout) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create pipelinelayout");
-        }
-
-        VkGraphicsPipelineCreateInfo pipelineCreateInfo = {};
-        pipelineCreateInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-        pipelineCreateInfo.renderPass = _renderPass;
-        pipelineCreateInfo.stageCount = 2;
-        pipelineCreateInfo.pStages = shaderStages;
-        pipelineCreateInfo.pVertexInputState = &vertexInputStateCreateInfo;
-        pipelineCreateInfo.pInputAssemblyState = &inputAssemblyStateCreateInfo;
-        pipelineCreateInfo.pViewportState = &viewportStateCreateInfo;
-        pipelineCreateInfo.pRasterizationState = &rasterizationStateCreateInfo;
-        pipelineCreateInfo.pMultisampleState = &multisampleStateCreateInfo;
-        pipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
-        pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
-        pipelineCreateInfo.pDynamicState = nullptr;
-        pipelineCreateInfo.layout = _pipelineLayout;
-        pipelineCreateInfo.renderPass = _renderPass;
-        pipelineCreateInfo.subpass = 0;
-        pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
-        pipelineCreateInfo.basePipelineIndex = -1;
-
-        if (vkCreateGraphicsPipelines(_device, VK_NULL_HANDLE, 1, &pipelineCreateInfo, nullptr, &_graphicsPipeline) !=
-            VK_SUCCESS) {
-            throw std::runtime_error("failed to create pipeline");
-        }
-
-        vkDestroyShaderModule(_device, vertModule, nullptr);
-        vkDestroyShaderModule(_device, fragModule, nullptr);
-
-
+        PipelineHelper::createGraphicsPipelines(_device, _swapChainExtent, _pipelineLayout, _renderPass,
+                                                _graphicsPipeline);
     }
 
-    void Application::createRenderPass() {
-        VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = _swapChainImageFormat;
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        VkAttachmentReference colorAttachmentRef = {};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpassDescription = {};
-        subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpassDescription.colorAttachmentCount = 1;
-        subpassDescription.pColorAttachments = &colorAttachmentRef;
-
-        VkSubpassDependency dependency = {};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-
-        VkRenderPassCreateInfo renderPassCreateInfo = {};
-        renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassCreateInfo.attachmentCount = 1;
-        renderPassCreateInfo.pAttachments = &colorAttachment;
-        renderPassCreateInfo.subpassCount = 1;
-        renderPassCreateInfo.pSubpasses = &subpassDescription;
-        renderPassCreateInfo.dependencyCount = 1;
-        renderPassCreateInfo.pDependencies = &dependency;
-
-        if (vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &_renderPass) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create render pass");
-        }
-    }
-
-    void Application::createFramebuffers() {
-        _swapChainFramebuffers.resize(_swapChainImageViews.size());
-        for (size_t i = 0; i < _swapChainImageViews.size(); i++) {
-            VkImageView attachments[] = {
-                    _swapChainImageViews[i]
-            };
-
-            VkFramebufferCreateInfo framebufferCreateInfo = {};
-            framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferCreateInfo.renderPass = _renderPass;
-            framebufferCreateInfo.pAttachments = attachments;
-            framebufferCreateInfo.attachmentCount = 1;
-            framebufferCreateInfo.width = _swapChainExtent.width;
-            framebufferCreateInfo.height = _swapChainExtent.height;
-            framebufferCreateInfo.layers = 1;
-
-            if (vkCreateFramebuffer(_device, &framebufferCreateInfo, nullptr, &_swapChainFramebuffers[i]) !=
-                VK_SUCCESS) {
-                throw std::runtime_error("failed to create framebuffer");
-            }
-        }
+    void Application::createFrameBuffers() {
+        FrameBufferHelper::createFrameBuffers(_device, _swapChainFrameBuffers, _swapChainImageViews, _renderPass,
+                                              _swapChainExtent);
     }
 
     void Application::createCommandPool() {
@@ -653,7 +450,7 @@ namespace Engine::RenderCore {
     }
 
     void Application::createCommandBuffers() {
-        _commandBuffers.resize(_swapChainFramebuffers.size());
+        _commandBuffers.resize(_swapChainFrameBuffers.size());
         VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAllocateInfo.commandPool = _commandPool;
@@ -674,7 +471,7 @@ namespace Engine::RenderCore {
             renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
             renderPassBeginInfo.renderPass = _renderPass;
             renderPassBeginInfo.clearValueCount = 1;
-            renderPassBeginInfo.framebuffer = _swapChainFramebuffers[i];
+            renderPassBeginInfo.framebuffer = _swapChainFrameBuffers[i];
             renderPassBeginInfo.renderArea.offset = {0, 0};
             renderPassBeginInfo.renderArea.extent = _swapChainExtent;
             VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -695,23 +492,26 @@ namespace Engine::RenderCore {
     }
 
     void Application::drawFrame() {
+        vkWaitForFences(_device, 1, &_inFlightFences[_currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
+        vkResetFences(_device, 1, &_inFlightFences[_currentFrame]);
         uint32_t imageIndex;
-        vkAcquireNextImageKHR(_device, _swapChain, std::numeric_limits<uint64_t>::max(), _imageAvailableSemaphore,
+        vkAcquireNextImageKHR(_device, _swapChain, std::numeric_limits<uint64_t>::max(),
+                              _imageAvailableSemaphores[_currentFrame],
                               VK_NULL_HANDLE, &imageIndex);
 
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        VkSemaphore waitSemaphores[] = {_imageAvailableSemaphore};
+        VkSemaphore waitSemaphores[] = {_imageAvailableSemaphores[_currentFrame]};
         VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &_commandBuffers[imageIndex];
-        VkSemaphore signalSemaphores[] = {_renderFinishedSemaphore};
+        VkSemaphore signalSemaphores[] = {_renderFinishedSemaphores[_currentFrame]};
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
-        if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
+        if (vkQueueSubmit(_graphicsQueue, 1, &submitInfo, _inFlightFences[_currentFrame]) != VK_SUCCESS) {
             throw std::runtime_error("failed to submit draw command");
         }
 
@@ -726,16 +526,17 @@ namespace Engine::RenderCore {
         presentInfoKhr.pImageIndices = &imageIndex;
         presentInfoKhr.pResults = nullptr;
         vkQueuePresentKHR(_graphicsQueue, &presentInfoKhr);
-
+        _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    void Application::createSemaphores() {
-        VkSemaphoreCreateInfo semaphoreCreateInfo = {};
-        semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        if (vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_imageAvailableSemaphore) != VK_SUCCESS ||
-            vkCreateSemaphore(_device, &semaphoreCreateInfo, nullptr, &_renderFinishedSemaphore) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create semaphores");
-        }
+    void Application::createRenderPass() {
+        RenderPassHelper::createRenderPass(_device, _swapChainImageFormat, _renderPass);
     }
+
+    void Application::createSyncObjects() {
+        SemaphoreHelper::createSyncObjects(_device, _imageAvailableSemaphores, _renderFinishedSemaphores,
+                                           _inFlightFences, MAX_FRAMES_IN_FLIGHT);
+    }
+
 
 }
