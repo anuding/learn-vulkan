@@ -47,7 +47,7 @@ namespace Engine::RenderCore {
         VkRenderPass _renderPass;
         VkPipelineLayout _pipelineLayout;
         VkPipeline  _graphicsPipeline;
-        std::vector<VkFramebuffer > _swapChainFramebuffers;
+        std::vector<VkFramebuffer > _swapChainFrameBuffers;
         VkCommandPool _commandPool;
         std::vector<VkCommandBuffer > _commandBuffers;
 
@@ -103,8 +103,6 @@ namespace Engine::RenderCore {
 
         bool checkPhysicalDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
 
-        SwapChainHelper::SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice);
-
         void createSwapChain();
 
         void createImageViews();
@@ -113,7 +111,7 @@ namespace Engine::RenderCore {
 
         void createRenderPass();
 
-        void createFramebuffers();
+        void createFrameBuffers();
 
         void createCommandPool();
 

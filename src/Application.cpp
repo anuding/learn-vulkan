@@ -4,6 +4,9 @@
 #include "Shader.h"
 #include "Semaphore.h"
 #include "Pipeline.h"
+#include "RenderPass.h"
+#include "FrameBuffer.h"
+
 
 namespace Engine::RenderCore {
 
@@ -33,7 +36,7 @@ namespace Engine::RenderCore {
         createImageViews();
         createRenderPass();
         createGraphicsPipelines();
-        createFramebuffers();
+        createFrameBuffers();
         createCommandPool();
         createCommandBuffers();
         createSyncObjects();
@@ -55,7 +58,7 @@ namespace Engine::RenderCore {
         }
 
         vkDestroyCommandPool(_device, _commandPool, nullptr);
-        for (auto framebuffer: _swapChainFramebuffers) {
+        for (auto framebuffer: _swapChainFrameBuffers) {
             vkDestroyFramebuffer(_device, framebuffer, nullptr);
         }
         vkDestroyPipeline(_device, _graphicsPipeline, nullptr);
@@ -64,7 +67,9 @@ namespace Engine::RenderCore {
         for (auto imageView: _swapChainImageViews) {
             vkDestroyImageView(_device, imageView, nullptr);
         }
+
         vkDestroySwapchainKHR(_device, _swapChain, nullptr);
+        //this is a red line
         vkDestroyDevice(_device, nullptr);
         if (enableValidationLayers)
             DestroyDebugUtilsMessengerEXT(_instance, _debugMessenger, nullptr);
@@ -254,7 +259,8 @@ namespace Engine::RenderCore {
 
         bool swapChainAdequate = false;
         if (isExtensionsSupported) {
-            SwapChainHelper::SwapChainSupportedDetails details = querySwapChainSupport(vkPhysicalDevice);
+            SwapChainHelper::SwapChainSupportedDetails details = SwapChainHelper::querySwapChainSupport(
+                    vkPhysicalDevice, _surface);
             swapChainAdequate = !details.formats.empty()
                                 && !details.presentModes.empty();
         }
@@ -346,29 +352,9 @@ namespace Engine::RenderCore {
     }
 
 
-    SwapChainHelper::SwapChainSupportedDetails Application::querySwapChainSupport(VkPhysicalDevice vkPhysicalDevice) {
-        SwapChainHelper::SwapChainSupportedDetails details;
-        vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, _surface, &details.capabilitiesKhr);
-
-        uint32_t formatCount;
-        vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, _surface, &formatCount, nullptr);
-        if (formatCount != 0) {
-            details.formats.resize(formatCount);
-            vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, _surface, &formatCount, details.formats.data());
-        }
-
-        uint32_t presentModeCount;
-        vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, _surface, &presentModeCount, nullptr);
-        if (presentModeCount != 0) {
-            details.presentModes.resize(presentModeCount);
-            vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, _surface, &presentModeCount,
-                                                      details.presentModes.data());
-        }
-        return details;
-    }
-
     void Application::createSwapChain() {
-        SwapChainHelper::SwapChainSupportedDetails details = querySwapChainSupport(_physicalDevice);
+        SwapChainHelper::SwapChainSupportedDetails details = SwapChainHelper::querySwapChainSupport(_physicalDevice,
+                                                                                                    _surface);
         VkSurfaceFormatKHR surfaceFormatKhr = SwapChainHelper::chooseSwapSurfaceFormat(details.formats);
         VkPresentModeKHR presentModeKhr = SwapChainHelper::chooseSwapPresentMode(details.presentModes);
         VkExtent2D extent2D = SwapChainHelper::chooseSwapExtent(details.capabilitiesKhr);
@@ -446,70 +432,9 @@ namespace Engine::RenderCore {
                                                 _graphicsPipeline);
     }
 
-    void Application::createRenderPass() {
-        VkAttachmentDescription colorAttachment = {};
-        colorAttachment.format = _swapChainImageFormat;
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
-        colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
-        colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-        colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
-        colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
-        colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
-
-        VkAttachmentReference colorAttachmentRef = {};
-        colorAttachmentRef.attachment = 0;
-        colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-
-        VkSubpassDescription subpassDescription = {};
-        subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-        subpassDescription.colorAttachmentCount = 1;
-        subpassDescription.pColorAttachments = &colorAttachmentRef;
-
-        VkSubpassDependency dependency = {};
-        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
-        dependency.dstSubpass = 0;
-        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.srcAccessMask = 0;
-        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT | VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
-
-
-        VkRenderPassCreateInfo renderPassCreateInfo = {};
-        renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderPassCreateInfo.attachmentCount = 1;
-        renderPassCreateInfo.pAttachments = &colorAttachment;
-        renderPassCreateInfo.subpassCount = 1;
-        renderPassCreateInfo.pSubpasses = &subpassDescription;
-        renderPassCreateInfo.dependencyCount = 1;
-        renderPassCreateInfo.pDependencies = &dependency;
-
-        if (vkCreateRenderPass(_device, &renderPassCreateInfo, nullptr, &_renderPass) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create render pass");
-        }
-    }
-
-    void Application::createFramebuffers() {
-        _swapChainFramebuffers.resize(_swapChainImageViews.size());
-        for (size_t i = 0; i < _swapChainImageViews.size(); i++) {
-            VkImageView attachments[] = {
-                    _swapChainImageViews[i]
-            };
-
-            VkFramebufferCreateInfo framebufferCreateInfo = {};
-            framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            framebufferCreateInfo.renderPass = _renderPass;
-            framebufferCreateInfo.pAttachments = attachments;
-            framebufferCreateInfo.attachmentCount = 1;
-            framebufferCreateInfo.width = _swapChainExtent.width;
-            framebufferCreateInfo.height = _swapChainExtent.height;
-            framebufferCreateInfo.layers = 1;
-
-            if (vkCreateFramebuffer(_device, &framebufferCreateInfo, nullptr, &_swapChainFramebuffers[i]) !=
-                VK_SUCCESS) {
-                throw std::runtime_error("failed to create framebuffer");
-            }
-        }
+    void Application::createFrameBuffers() {
+        FrameBufferHelper::createFrameBuffers(_device, _swapChainFrameBuffers, _swapChainImageViews, _renderPass,
+                                              _swapChainExtent);
     }
 
     void Application::createCommandPool() {
@@ -525,7 +450,7 @@ namespace Engine::RenderCore {
     }
 
     void Application::createCommandBuffers() {
-        _commandBuffers.resize(_swapChainFramebuffers.size());
+        _commandBuffers.resize(_swapChainFrameBuffers.size());
         VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAllocateInfo.commandPool = _commandPool;
@@ -546,7 +471,7 @@ namespace Engine::RenderCore {
             renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
             renderPassBeginInfo.renderPass = _renderPass;
             renderPassBeginInfo.clearValueCount = 1;
-            renderPassBeginInfo.framebuffer = _swapChainFramebuffers[i];
+            renderPassBeginInfo.framebuffer = _swapChainFrameBuffers[i];
             renderPassBeginInfo.renderArea.offset = {0, 0};
             renderPassBeginInfo.renderArea.extent = _swapChainExtent;
             VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
@@ -602,6 +527,10 @@ namespace Engine::RenderCore {
         presentInfoKhr.pResults = nullptr;
         vkQueuePresentKHR(_graphicsQueue, &presentInfoKhr);
         _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
+    void Application::createRenderPass() {
+        RenderPassHelper::createRenderPass(_device, _swapChainImageFormat, _renderPass);
     }
 
     void Application::createSyncObjects() {

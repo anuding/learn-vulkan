@@ -19,7 +19,7 @@ namespace Engine::RenderCore {
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats);
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR> &availablePresentModes);
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
-
+        SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice &vkPhysicalDevice, VkSurfaceKHR surfaceKhr);
     }
 #endif //ENGINE_SWAPCHAIN_H
 }

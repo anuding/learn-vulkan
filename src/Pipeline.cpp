@@ -144,8 +144,6 @@ namespace Engine::RenderCore {
 
             vkDestroyShaderModule(device, vertModule, nullptr);
             vkDestroyShaderModule(device, fragModule, nullptr);
-
-
         }
 
 

@@ -3,7 +3,7 @@ ADD_LIBRARY(Application
 		Semaphore.cpp
 		Pipeline.cpp
 		SwapChain.cpp
-		Shader.cpp )
+		Shader.cpp CommandPool.cpp CommandPool.h CommandBuffer.cpp CommandBuffer.h RenderPass.cpp RenderPass.h FrameBuffer.cpp FrameBuffer.h)
 
 ADD_EXECUTABLE(engine main.cpp)
 
