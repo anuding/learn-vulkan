@@ -4,6 +4,9 @@
 
 #include <limits>
 #include "SwapChain.h"
+#include <algorithm>
+#include <iostream>
+#include <string>
 
 namespace Engine::RenderCore {
     namespace SwapChainHelper {
