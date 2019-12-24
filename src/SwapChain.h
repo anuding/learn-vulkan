@@ -2,8 +2,6 @@
 // Created by anuding on 2019/11/21.
 //
 
-#ifndef ENGINE_SWAPCHAIN_H
-#define ENGINE_SWAPCHAIN_H
 
 #include <vulkan/vulkan.h>
 #include <vector>
@@ -21,5 +19,4 @@ namespace Engine::RenderCore {
         VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities);
         SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice &vkPhysicalDevice, VkSurfaceKHR surfaceKhr);
     }
-#endif //ENGINE_SWAPCHAIN_H
 }

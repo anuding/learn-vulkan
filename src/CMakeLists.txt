@@ -3,7 +3,7 @@ ADD_LIBRARY(Application
 		Semaphore.cpp
 		Pipeline.cpp
 		SwapChain.cpp
-		Shader.cpp CommandBuffer.cpp CommandBuffer.h RenderPass.cpp RenderPass.h FrameBuffer.cpp FrameBuffer.h Queue.cpp Queue.h ValidationLayer.cpp ValidationLayer.h Device.cpp Device.h)
+		Shader.cpp CommandBuffer.cpp CommandBuffer.h RenderPass.cpp RenderPass.h FrameBuffer.cpp FrameBuffer.h Queue.cpp Queue.h ValidationLayer.cpp ValidationLayer.h Device.cpp Device.h Vertex.cpp Vertex.h Scene.cpp Scene.h Game.cpp Game.h GameObject.cpp GameObject.h Mesh.cpp Mesh.h BufferManager.cpp BufferManager.h)
 
 ADD_EXECUTABLE(engine main.cpp)
 

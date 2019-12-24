@@ -8,12 +8,19 @@
 #include "FrameBuffer.h"
 #include "CommandBuffer.h"
 #include "ValidationLayer.h"
+#include "SwapChain.h"
+#include "Queue.h"
+#include <thread>
 
 namespace Engine::RenderCore {
 
-    void Application::run() {
+    Application::Application() {
         initWindow();
         initVulkan();
+    }
+
+    void Application::run() {
+
         mainLoop();
         cleanUp();
     }
@@ -28,7 +35,7 @@ namespace Engine::RenderCore {
 
     void Application::initVulkan() {
         createInstance();
-        DebugUtils::setupDebugMessenger(enableValidationLayers,_instance,_debugMessenger);
+        DebugUtils::setupDebugMessenger(enableValidationLayers, _instance, _debugMessenger);
 
         createSurface();
         pickPhysicalDevice();
@@ -42,8 +49,11 @@ namespace Engine::RenderCore {
                                               _swapChainExtent);
         CommandHelper::createCommandPool(_physicalDevice, _device, _commandPool,
                                          _surface);
+        bufferManager.createVertexBuffer(_physicalDevice, _device, _vertexBuffer, _vertexBufferMemory,
+                                         vertices);
         CommandHelper::createCommandBuffers(_device, _commandBuffers, _swapChainFrameBuffers, _commandPool,
-                                            _renderPass, _swapChainExtent, _graphicsPipeline);
+                                            _renderPass, _swapChainExtent, _graphicsPipeline,_vertexBuffer);
+
         SemaphoreHelper::createSyncObjects(_device, _imageAvailableSemaphores, _renderFinishedSemaphores,
                                            _inFlightFences, MAX_FRAMES_IN_FLIGHT);
     }
@@ -51,6 +61,16 @@ namespace Engine::RenderCore {
     void Application::mainLoop() {
         while (!glfwWindowShouldClose(_window)) {
             glfwPollEvents();
+            a = std::chrono::system_clock::now();
+            std::chrono::duration<double, std::milli> work_time = a - b;
+            if (work_time.count() < 17) {
+                std::chrono::duration<double, std::milli> delta_ms(17 - work_time.count());
+                auto delta_ms_duration = std::chrono::duration_cast<std::chrono::milliseconds>(delta_ms);
+                std::this_thread::sleep_for(std::chrono::milliseconds(delta_ms_duration.count()));
+            }
+            b = std::chrono::system_clock::now();
+
+            update();
             drawFrame();
         }
         vkDeviceWaitIdle(_device);
@@ -75,6 +95,8 @@ namespace Engine::RenderCore {
         }
 
         vkDestroySwapchainKHR(_device, _swapChain, nullptr);
+        vkDestroyBuffer(_device, _vertexBuffer, nullptr);
+        vkFreeMemory(_device, _vertexBufferMemory, nullptr);
         //this is a red line
         vkDestroyDevice(_device, nullptr);
         if (enableValidationLayers)
@@ -210,7 +232,6 @@ namespace Engine::RenderCore {
                && isExtensionsSupported
                && swapChainAdequate;
     }
-
 
     void Application::createLogicalDevice() {
         Queue::QueueFamilyIndices indices = Queue::findQueueFamilies(_physicalDevice, _surface);
@@ -381,5 +402,9 @@ namespace Engine::RenderCore {
         presentInfoKhr.pResults = nullptr;
         vkQueuePresentKHR(_graphicsQueue, &presentInfoKhr);
         _currentFrame = (_currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+    }
+
+    void Application::update() {
+
     }
 }
