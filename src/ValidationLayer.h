@@ -1,14 +1,19 @@
 //
 // Created by anuding on 2019/12/24.
 //
-
-#ifndef ENGINE_VALIDATIONLAYER_H
-#define ENGINE_VALIDATIONLAYER_H
-
-
-class ValidationLayer {
-
-};
-
-
-#endif //ENGINE_VALIDATIONLAYER_H
+#include <vulkan/vulkan.h>
+#include <vector>
+namespace Engine::DebugUtils{
+    void populateDebugMessengerCreateInfo(
+            VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+    void setupDebugMessenger(bool enableValidationLayers, VkInstance &instance,
+                             VkDebugUtilsMessengerEXT &debugUtilsMessengerExt);
+    VkResult CreateDebugUtilsMessengerEXT(
+            VkInstance instance,
+            const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+            const VkAllocationCallbacks *pAllocator,
+            VkDebugUtilsMessengerEXT *pDebugMessenger);
+    void DestroyDebugUtilsMessengerEXT(VkInstance instance,
+                                       VkDebugUtilsMessengerEXT debugMessenger, const
+                                       VkAllocationCallbacks *pAllocator);
+}

@@ -66,19 +66,6 @@ namespace Engine::RenderCore {
 
         void checkInstanceExtensionsSupport(const std::vector<const char *> &requiredExtensions);
 
-        void setupDebugMessenger();
-
-        VkResult CreateDebugUtilsMessengerEXT(
-                VkInstance instance,
-                const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
-                const VkAllocationCallbacks *pAllocator,
-                VkDebugUtilsMessengerEXT *pDebugMessenger);
-
-        void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
-                                           const VkAllocationCallbacks *pAllocator);
-
-        void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
-
         void pickPhysicalDevice();
 
         void checkPhysicalDeviceSupport(std::vector<VkPhysicalDevice> &vkPhysicalDevices);
@@ -95,18 +82,7 @@ namespace Engine::RenderCore {
 
         void createImageViews();
 
-        void createGraphicsPipelines();
-
-        void createRenderPass();
-
-        void createFrameBuffers();
-
-        void createCommandPool();
-
-        void createCommandBuffers();
-
         void drawFrame();
 
-        void createSyncObjects();
     };
 }
