@@ -30,7 +30,7 @@ namespace Engine::RenderCore {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_FALSE);
-        _window = glfwCreateWindow(WIDTH, HEIGHT, "blacklist4000", nullptr, nullptr);
+        _window = glfwCreateWindow(WIDTH, HEIGHT, "EngineTest", nullptr, nullptr);
     }
 
     void Application::initVulkan() {
@@ -42,20 +42,23 @@ namespace Engine::RenderCore {
         createLogicalDevice();
         createSwapChain();
         createImageViews();
+
         RenderPassHelper::createRenderPass(_device, _swapChainImageFormat, _renderPass);
+
         PipelineHelper::createGraphicsPipelines(_device, _swapChainExtent, _pipelineLayout, _renderPass,
                                                 _graphicsPipeline);
+
         FrameBufferHelper::createFrameBuffers(_device, _swapChainFrameBuffers, _swapChainImageViews, _renderPass,
                                               _swapChainExtent);
+
         CommandHelper::createCommandPool(_physicalDevice, _device, _commandPool,
                                          _surface);
-        bufferManager.createVertexBuffer(_physicalDevice, _device, _vertexBuffer, _vertexBufferMemory,
-                                         vertices);
-        CommandHelper::createCommandBuffers(_device, _commandBuffers, _swapChainFrameBuffers, _commandPool,
-                                            _renderPass, _swapChainExtent, _graphicsPipeline,_vertexBuffer);
+
 
         SemaphoreHelper::createSyncObjects(_device, _imageAvailableSemaphores, _renderFinishedSemaphores,
                                            _inFlightFences, MAX_FRAMES_IN_FLIGHT);
+
+
     }
 
     void Application::mainLoop() {
@@ -114,7 +117,7 @@ namespace Engine::RenderCore {
         VkInstanceCreateInfo instanceCreateInfo = {};
         VkApplicationInfo applicationInfo = {};
         applicationInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-        applicationInfo.pApplicationName = "blacklist4000";
+        applicationInfo.pApplicationName = "EngineTest";
         applicationInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         applicationInfo.pEngineName = "No Engine";
         applicationInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);

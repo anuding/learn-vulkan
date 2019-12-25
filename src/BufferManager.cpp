@@ -12,11 +12,11 @@ namespace Engine::RenderCore::Resource {
             VkDevice &device,
             VkBuffer &vertexBuffer,
             VkDeviceMemory &vertexBufferMemory,
-            std::vector<Vertex> &vertices
+            std::vector<Vertex> vertices
     ) {
         VkBufferCreateInfo bufferCreateInfo = {};
         bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-        bufferCreateInfo.size = sizeof(vertices);
+        bufferCreateInfo.size = sizeof(vertices[0]) * vertices.size();
         bufferCreateInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
         bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         if (vkCreateBuffer(device, &bufferCreateInfo, nullptr, &vertexBuffer) != VK_SUCCESS) {

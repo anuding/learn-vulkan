@@ -14,7 +14,7 @@ namespace Engine::RenderCore::CommandHelper {
         VkCommandPoolCreateInfo commandPoolCreateInfo = {};
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
-        commandPoolCreateInfo.flags = 0;
+        commandPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
         if (vkCreateCommandPool(device, &commandPoolCreateInfo, nullptr, &commandPool) != VK_SUCCESS) {
             throw std::runtime_error("failed to create command pool");
@@ -29,7 +29,8 @@ namespace Engine::RenderCore::CommandHelper {
             VkRenderPass &renderPass,
             VkExtent2D &extent2D,
             VkPipeline &graphicsPipeline,
-            VkBuffer &vertexBuffer) {
+            VkBuffer &vertexBuffer,
+            uint32_t size) {
         commandBuffers.resize(_swapChainFrameBuffers.size());
         VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -68,14 +69,13 @@ namespace Engine::RenderCore::CommandHelper {
             VkDeviceSize offsets[] = {0};
             vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers,
                                    offsets);
-            vkCmdDraw(commandBuffers[i], static_cast<uint32_t >(3), 1, 0, 0);
+            vkCmdDraw(commandBuffers[i], size, 1, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to record command buffer");
             }
         }
-
 
     }
 }

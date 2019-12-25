@@ -16,5 +16,6 @@ namespace Engine::RenderCore::CommandHelper {
             VkRenderPass &renderPass,
             VkExtent2D &extent2D,
             VkPipeline &graphicsPipeline,
-            VkBuffer &vertexBuffer);
+            VkBuffer &vertexBuffer,
+            uint32_t size);
 }

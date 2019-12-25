@@ -14,6 +14,7 @@ namespace Engine {
         std::vector<Scene> scenes;
     public:
         Game();
+        void init();
         virtual void update() override;
     };
 }

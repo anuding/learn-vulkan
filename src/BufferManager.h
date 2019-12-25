@@ -17,7 +17,7 @@ namespace Engine::RenderCore::Resource {
                 VkDevice &device,
                 VkBuffer &vertexBuffer,
                 VkDeviceMemory &vertexBufferMemory,
-                std::vector<Vertex> &vertices
+                std::vector<Vertex> vertices
         );
 
     private:
