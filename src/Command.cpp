@@ -3,7 +3,7 @@
 //
 
 #include <stdexcept>
-#include "CommandBuffer.h"
+#include "Command.h"
 #include "Queue.h"
 
 namespace Engine::RenderCore::CommandHelper {

@@ -17,12 +17,21 @@ namespace Engine::RenderCore::Resource {
                 VkDevice &device,
                 VkBuffer &vertexBuffer,
                 VkDeviceMemory &vertexBufferMemory,
-                std::vector<Vertex> vertices
+                const std::vector<Vertex> &vertices,
+                VkCommandPool &commandPool, VkQueue &queue
         );
 
+
     private:
-        uint32_t findMemoryType( VkPhysicalDevice &physicalDevice,
-                                 VkDevice &device,uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+        void createBuffer(VkPhysicalDevice &physicalDevice, VkDevice &device, VkDeviceSize deviceSize,
+                          VkBufferUsageFlags usageFlags,
+                          VkMemoryPropertyFlags propertyFlags, VkBuffer &buffer, VkDeviceMemory &deviceMemory);
+
+        uint32_t findMemoryType(VkPhysicalDevice &physicalDevice,
+                                VkDevice &device, uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+
+        void copyBuffer(VkDevice &device, VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size,
+                        VkCommandPool &commandPool, VkQueue &queue);
     };
 }
 

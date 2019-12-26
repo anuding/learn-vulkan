@@ -4,7 +4,7 @@ ADD_LIBRARY(ENGINE_CORE #SHARED
         Pipeline.cpp
         SwapChain.cpp
         Shader.cpp
-        CommandBuffer.cpp
+        Command.cpp
         RenderPass.cpp
         FrameBuffer.cpp
         Queue.cpp

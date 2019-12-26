@@ -6,7 +6,7 @@
 #include "Pipeline.h"
 #include "RenderPass.h"
 #include "FrameBuffer.h"
-#include "CommandBuffer.h"
+#include "Command.h"
 #include "ValidationLayer.h"
 #include "SwapChain.h"
 #include "Queue.h"

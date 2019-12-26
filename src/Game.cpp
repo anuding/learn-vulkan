@@ -3,7 +3,7 @@
 //
 
 #include "Game.h"
-#include "CommandBuffer.h"
+#include "Command.h"
 
 
 void Engine::Game::update() {
@@ -21,7 +21,8 @@ void Engine::Game::init() {
 Engine::Game::Game(Scene &scene) {
     scenes.push_back(scene);
     bufferManager.createVertexBuffer(_physicalDevice, _device, _vertexBuffer, _vertexBufferMemory,
-                                     scene.getGameObjects()[0].getMesh().getVertices());
+                                     scene.getGameObjects()[0].getMesh().getVertices(),
+                                     _commandPool, _graphicsQueue);
     RenderCore::CommandHelper::createCommandBuffers(_device, _commandBuffers, _swapChainFrameBuffers, _commandPool,
                                                     _renderPass, _swapChainExtent, _graphicsPipeline, _vertexBuffer,
                                                     static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getVertices().size()));
