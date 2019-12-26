@@ -16,7 +16,7 @@ ADD_LIBRARY(ENGINE_CORE #SHARED
         GameObject.cpp
         Mesh.cpp
         BufferManager.cpp
-        )
+        VKContext.cpp VKContext.h)
 
 
 ADD_EXECUTABLE(engine main.cpp)

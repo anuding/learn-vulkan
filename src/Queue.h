@@ -14,12 +14,6 @@ namespace Engine::RenderCore::Queue {
         }
     };
 
-    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice &vkPhysicalDevice, VkSurfaceKHR &surfaceKhr);
-
-    class Queue {
-
-    };
-
-
+    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice);
 }
 

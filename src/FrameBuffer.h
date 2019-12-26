@@ -8,8 +8,7 @@
 
 namespace Engine::RenderCore {
     namespace FrameBufferHelper {
-        void createFrameBuffers(VkDevice &device, std::vector<VkFramebuffer> &swapChainFrameBuffers,
-                                std::vector<VkImageView> &swapChainViews,
-                                VkRenderPass &renderPass, VkExtent2D &swapChainExtent);
+        void createFrameBuffers(std::vector<VkFramebuffer> &swapChainFrameBuffers,
+                                std::vector<VkImageView> &swapChainViews);
     }
 }

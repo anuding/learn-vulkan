@@ -12,26 +12,16 @@
 namespace Engine::RenderCore::Resource {
     class BufferManager {
     public:
-        void createVertexBuffer(
-                VkPhysicalDevice &physicalDevice,
-                VkDevice &device,
-                VkBuffer &vertexBuffer,
-                VkDeviceMemory &vertexBufferMemory,
-                const std::vector<Vertex> &vertices,
-                VkCommandPool &commandPool, VkQueue &queue
-        );
+        void createVertexBuffer(const std::vector<Vertex> &vertices);
 
 
     private:
-        void createBuffer(VkPhysicalDevice &physicalDevice, VkDevice &device, VkDeviceSize deviceSize,
-                          VkBufferUsageFlags usageFlags,
-                          VkMemoryPropertyFlags propertyFlags, VkBuffer &buffer, VkDeviceMemory &deviceMemory);
+        void createBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags,
+                          VkBuffer &buffer, VkDeviceMemory &deviceMemory);
 
-        uint32_t findMemoryType(VkPhysicalDevice &physicalDevice,
-                                VkDevice &device, uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
 
-        void copyBuffer(VkDevice &device, VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size,
-                        VkCommandPool &commandPool, VkQueue &queue);
+        void copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size);
     };
 }
 

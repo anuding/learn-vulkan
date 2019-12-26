@@ -6,6 +6,6 @@
 
 namespace Engine::RenderCore {
     namespace RenderPassHelper {
-        void createRenderPass(VkDevice &device, VkFormat &swapChainImageFormat, VkRenderPass &renderPass);
+        void createRenderPass();
     }
 }

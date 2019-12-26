@@ -4,12 +4,12 @@
 
 #include <stdexcept>
 #include "FrameBuffer.h"
+#include "VKContext.h"
 
 namespace Engine::RenderCore {
     namespace FrameBufferHelper {
-        void createFrameBuffers(VkDevice &device, std::vector<VkFramebuffer> &swapChainFrameBuffers,
-                                std::vector<VkImageView> &swapChainViews,
-                                VkRenderPass &renderPass, VkExtent2D &swapChainExtent) {
+        void createFrameBuffers( std::vector<VkFramebuffer> &swapChainFrameBuffers,
+                                std::vector<VkImageView> &swapChainViews ) {
             swapChainFrameBuffers.resize(swapChainViews.size());
             for (size_t i = 0; i < swapChainViews.size(); i++) {
                 VkImageView attachments[] = {

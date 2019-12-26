@@ -8,6 +8,6 @@
 namespace Engine::RenderCore {
     namespace ShaderHelper {
         std::vector<char> readFile(const std::string & filename);
-        VkShaderModule createShaderModule(const VkDevice& device,const std::vector<char>& code);
+        VkShaderModule createShaderModule(const std::vector<char>& code);
     }
 }

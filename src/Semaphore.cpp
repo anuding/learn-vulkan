@@ -3,11 +3,11 @@
 //
 #include <stdexcept>
 #include "Semaphore.h"
+#include "VKContext.h"
 
 namespace Engine::RenderCore {
     namespace SemaphoreHelper {
-        void createSyncObjects(VkDevice &device,
-                               std::vector<VkSemaphore> &imageAvailableSemaphores,
+        void createSyncObjects(std::vector<VkSemaphore> &imageAvailableSemaphores,
                                std::vector<VkSemaphore> &renderFinishedSemaphores,
                                std::vector<VkFence> &inFlightFences,
                                size_t MAX_FRAMES_IN_FLIGHT) {

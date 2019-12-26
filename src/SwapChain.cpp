@@ -4,14 +4,13 @@
 
 #include <limits>
 #include "SwapChain.h"
+#include "VKContext.h"
 #include <algorithm>
 #include <iostream>
 #include <string>
 
 namespace Engine::RenderCore {
     namespace SwapChainHelper {
-        const uint32_t WIDTH = 720;
-        const uint32_t HEIGHT = 480;
 
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR> &availableFormats) {
             if (availableFormats.size() == 1 && availableFormats[0].format == VK_FORMAT_UNDEFINED)
@@ -36,11 +35,11 @@ namespace Engine::RenderCore {
             return bestMode;
         }
 
-        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities) {
+        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR &capabilities, uint32_t width, uint32_t height) {
             if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max()) {
                 return capabilities.currentExtent;
             } else {
-                VkExtent2D actualExtent = {WIDTH, HEIGHT};
+                VkExtent2D actualExtent = {width, height};
                 actualExtent.width = std::max(capabilities.minImageExtent.width,
                                               std::min(capabilities.maxImageExtent.width, actualExtent.width));
                 actualExtent.height = std::max(capabilities.minImageExtent.height,
@@ -49,22 +48,22 @@ namespace Engine::RenderCore {
             }
         }
 
-        SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice &vkPhysicalDevice, VkSurfaceKHR surfaceKhr) {
+        SwapChainSupportedDetails querySwapChainSupport(VkPhysicalDevice physicalDevice) {
             SwapChainSupportedDetails details;
-            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vkPhysicalDevice, surfaceKhr, &details.capabilitiesKhr);
+            vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &details.capabilitiesKhr);
 
             uint32_t formatCount;
-            vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, surfaceKhr, &formatCount, nullptr);
+            vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
             if (formatCount != 0) {
                 details.formats.resize(formatCount);
-                vkGetPhysicalDeviceSurfaceFormatsKHR(vkPhysicalDevice, surfaceKhr, &formatCount, details.formats.data());
+                vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, details.formats.data());
             }
 
             uint32_t presentModeCount;
-            vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, surfaceKhr, &presentModeCount, nullptr);
+            vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
             if (presentModeCount != 0) {
                 details.presentModes.resize(presentModeCount);
-                vkGetPhysicalDeviceSurfacePresentModesKHR(vkPhysicalDevice, surfaceKhr, &presentModeCount,
+                vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount,
                                                           details.presentModes.data());
             }
             return details;

@@ -3,14 +3,16 @@
 //
 
 #include "Queue.h"
+#include "VKContext.h"
+
 namespace Engine::RenderCore::Queue{
-    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice &vkPhysicalDevice, VkSurfaceKHR &surfaceKhr) {
+    QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice) {
         QueueFamilyIndices indices;
 
         uint32_t queueFamilyCount = 0;
-        vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyCount, nullptr);
+        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
         std::vector<VkQueueFamilyProperties> queueFamilyProperties(queueFamilyCount);
-        vkGetPhysicalDeviceQueueFamilyProperties(vkPhysicalDevice, &queueFamilyCount, queueFamilyProperties.data());
+        vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilyProperties.data());
 
         VkBool32 presentSupport = false;
         int i = 0;
@@ -18,7 +20,7 @@ namespace Engine::RenderCore::Queue{
             if (qfp.queueCount > 0 && qfp.queueFlags & VK_QUEUE_GRAPHICS_BIT)
                 indices.graphicsFamily = i;
 
-            vkGetPhysicalDeviceSurfaceSupportKHR(vkPhysicalDevice, i, surfaceKhr, &presentSupport);
+            vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
             if (qfp.queueCount > 0 && presentSupport)
                 indices.presentFamily = i;
 

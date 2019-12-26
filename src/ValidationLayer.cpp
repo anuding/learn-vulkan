@@ -4,7 +4,9 @@
 
 #include <iostream>
 #include "ValidationLayer.h"
-namespace Engine::DebugUtils{
+#include "VKContext.h"
+
+namespace Engine::RenderCore::DebugUtils {
 
     static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
             VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -16,8 +18,7 @@ namespace Engine::DebugUtils{
         return VK_FALSE;
     }
 
-    void populateDebugMessengerCreateInfo(
-            VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
+    void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo) {
         createInfo = {};
         createInfo.sType =
                 VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -32,41 +33,36 @@ namespace Engine::DebugUtils{
         createInfo.pfnUserCallback = debugCallback;
     }
 
-    void setupDebugMessenger(bool enableValidationLayers, VkInstance &instance,
-                             VkDebugUtilsMessengerEXT &debugUtilsMessengerExt) {
+    void setupDebugMessenger(bool enableValidationLayers) {
         if (!enableValidationLayers) return;
         VkDebugUtilsMessengerCreateInfoEXT createInfoExt;
         populateDebugMessengerCreateInfo(createInfoExt);
-        if (CreateDebugUtilsMessengerEXT(instance, &createInfoExt, nullptr,
-                                         &debugUtilsMessengerExt) != VK_SUCCESS) {
+        if (CreateDebugUtilsMessengerEXT(&createInfoExt, nullptr, &RenderCore::debugMessenger) != VK_SUCCESS) {
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }
 
     VkResult CreateDebugUtilsMessengerEXT(
-            VkInstance instance,
             const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
             const VkAllocationCallbacks *pAllocator,
             VkDebugUtilsMessengerEXT *pDebugMessenger) {
         auto func = (PFN_vkCreateDebugUtilsMessengerEXT)
-                vkGetInstanceProcAddr(instance,
+                vkGetInstanceProcAddr(RenderCore::instance,
                                       "vkCreateDebugUtilsMessengerEXT");
         if (func != nullptr) {
-            return func(instance, pCreateInfo, pAllocator,
+            return func(RenderCore::instance, pCreateInfo, pAllocator,
                         pDebugMessenger);
         } else {
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
     }
 
-    void DestroyDebugUtilsMessengerEXT(VkInstance instance,
-                                                    VkDebugUtilsMessengerEXT debugMessenger, const
-                                                    VkAllocationCallbacks *pAllocator) {
+    void DestroyDebugUtilsMessengerEXT() {
         auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)
-                vkGetInstanceProcAddr(instance,
+                vkGetInstanceProcAddr(RenderCore::instance,
                                       "vkDestroyDebugUtilsMessengerEXT");
         if (func != nullptr) {
-            func(instance, debugMessenger, pAllocator);
+            func(RenderCore::instance, debugMessenger, nullptr);
         }
     }
 

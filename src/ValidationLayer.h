@@ -3,17 +3,16 @@
 //
 #include <vulkan/vulkan.h>
 #include <vector>
-namespace Engine::DebugUtils{
-    void populateDebugMessengerCreateInfo(
-            VkDebugUtilsMessengerCreateInfoEXT &createInfo);
-    void setupDebugMessenger(bool enableValidationLayers, VkInstance &instance,
-                             VkDebugUtilsMessengerEXT &debugUtilsMessengerExt);
-    VkResult CreateDebugUtilsMessengerEXT(
-            VkInstance instance,
-            const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
-            const VkAllocationCallbacks *pAllocator,
-            VkDebugUtilsMessengerEXT *pDebugMessenger);
-    void DestroyDebugUtilsMessengerEXT(VkInstance instance,
-                                       VkDebugUtilsMessengerEXT debugMessenger, const
-                                       VkAllocationCallbacks *pAllocator);
+
+namespace Engine::RenderCore::DebugUtils {
+    void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT &createInfo);
+
+    void setupDebugMessenger(bool enableValidationLayers);
+
+    VkResult CreateDebugUtilsMessengerEXT(const VkDebugUtilsMessengerCreateInfoEXT *pCreateInfo,
+                                          const VkAllocationCallbacks *pAllocator,
+                                          VkDebugUtilsMessengerEXT *pDebugMessenger);
+
+    void
+    DestroyDebugUtilsMessengerEXT( );
 }

@@ -7,7 +7,6 @@
 
 namespace Engine::RenderCore {
     namespace PipelineHelper {
-        void createGraphicsPipelines(VkDevice &device, VkExtent2D &swapChainExtent, VkPipelineLayout &pipelineLayout,
-                                     VkRenderPass &renderPass, VkPipeline &graphicsPipeline);
+        void createGraphicsPipelines();
     }
 }

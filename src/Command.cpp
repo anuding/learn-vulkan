@@ -5,12 +5,11 @@
 #include <stdexcept>
 #include "Command.h"
 #include "Queue.h"
+#include "VKContext.h"
 
 namespace Engine::RenderCore::CommandHelper {
-    void createCommandPool(VkPhysicalDevice &physicalDevice, VkDevice &device, VkCommandPool &commandPool,
-                           VkSurfaceKHR &surfaceKhr) {
-        Queue::QueueFamilyIndices queueFamilyIndices = Queue::findQueueFamilies(
-                physicalDevice, surfaceKhr);
+    void createCommandPool() {
+        Queue::QueueFamilyIndices queueFamilyIndices = Queue::findQueueFamilies(physicalDevice);
         VkCommandPoolCreateInfo commandPoolCreateInfo = {};
         commandPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
         commandPoolCreateInfo.queueFamilyIndex = queueFamilyIndices.graphicsFamily;
@@ -21,17 +20,8 @@ namespace Engine::RenderCore::CommandHelper {
         }
     }
 
-    void createCommandBuffers(
-            VkDevice &device,
-            std::vector<VkCommandBuffer> &commandBuffers,
-            std::vector<VkFramebuffer> &_swapChainFrameBuffers,
-            VkCommandPool &commandPool,
-            VkRenderPass &renderPass,
-            VkExtent2D &extent2D,
-            VkPipeline &graphicsPipeline,
-            VkBuffer &vertexBuffer,
-            uint32_t size) {
-        commandBuffers.resize(_swapChainFrameBuffers.size());
+    void createCommandBuffers(uint32_t vertexArrayLength) {
+        commandBuffers.resize(swapChainFrameBuffers.size());
         VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         commandBufferAllocateInfo.commandPool = commandPool;
@@ -52,9 +42,9 @@ namespace Engine::RenderCore::CommandHelper {
             renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
             renderPassBeginInfo.renderPass = renderPass;
             renderPassBeginInfo.clearValueCount = 1;
-            renderPassBeginInfo.framebuffer = _swapChainFrameBuffers[i];
+            renderPassBeginInfo.framebuffer = swapChainFrameBuffers[i];
             renderPassBeginInfo.renderArea.offset = {0, 0};
-            renderPassBeginInfo.renderArea.extent = extent2D;
+            renderPassBeginInfo.renderArea.extent = swapChainExtent;
             VkClearValue clearValue = {0.0f, 0.0f, 0.0f, 1.0f};
             renderPassBeginInfo.pClearValues = &clearValue;
 
@@ -69,7 +59,7 @@ namespace Engine::RenderCore::CommandHelper {
             VkDeviceSize offsets[] = {0};
             vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers,
                                    offsets);
-            vkCmdDraw(commandBuffers[i], size, 1, 0, 0);
+            vkCmdDraw(commandBuffers[i], vertexArrayLength, 1, 0, 0);
 
             vkCmdEndRenderPass(commandBuffers[i]);
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {

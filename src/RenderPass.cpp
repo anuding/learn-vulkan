@@ -2,11 +2,12 @@
 // Created by anuding on 2019/12/21.
 //
 #include "RenderPass.h"
+#include "VKContext.h"
 #include <stdexcept>
 
 namespace Engine::RenderCore {
     namespace RenderPassHelper {
-        void createRenderPass(VkDevice &device, VkFormat &swapChainImageFormat, VkRenderPass &renderPass) {
+        void createRenderPass() {
             VkAttachmentDescription colorAttachment = {};
             colorAttachment.format = swapChainImageFormat;
             colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;

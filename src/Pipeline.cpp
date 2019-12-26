@@ -5,16 +5,16 @@
 #include "Pipeline.h"
 #include "Shader.h"
 #include "Vertex.h"
+#include "VKContext.h"
 
 namespace Engine::RenderCore {
     namespace PipelineHelper {
 
-        void createGraphicsPipelines(VkDevice &device, VkExtent2D &swapChainExtent, VkPipelineLayout &pipelineLayout,
-                                     VkRenderPass &renderPass, VkPipeline &graphicsPipeline) {
+        void createGraphicsPipelines() {
             auto vertShaderCode = ShaderHelper::readFile("../../spv_shaders/vert.spv");
             auto fragShaderCode = ShaderHelper::readFile("../../spv_shaders/frag.spv");
-            VkShaderModule vertModule = ShaderHelper::createShaderModule(device, vertShaderCode);
-            VkShaderModule fragModule = ShaderHelper::createShaderModule(device, fragShaderCode);
+            VkShaderModule vertModule = ShaderHelper::createShaderModule(vertShaderCode);
+            VkShaderModule fragModule = ShaderHelper::createShaderModule(fragShaderCode);
 
             VkPipelineShaderStageCreateInfo vertShaderStageCreateInfo = {};
             vertShaderStageCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;

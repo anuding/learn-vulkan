@@ -4,20 +4,15 @@
 
 #include <stdexcept>
 #include "BufferManager.h"
+#include "VKContext.h"
 
 namespace Engine::RenderCore::Resource {
 
-    void BufferManager::createVertexBuffer(
-            VkPhysicalDevice &physicalDevice,
-            VkDevice &device,
-            VkBuffer &vertexBuffer,
-            VkDeviceMemory &vertexBufferMemory,
-            const std::vector<Vertex> &vertices, VkCommandPool &commandPool, VkQueue &queue
-    ) {
+    void BufferManager::createVertexBuffer(const std::vector<Vertex> &vertices) {
         VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
-        createBuffer(physicalDevice, device, bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
                      VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
                      stagingBufferMemory);
@@ -27,18 +22,17 @@ namespace Engine::RenderCore::Resource {
         vkUnmapMemory(device, stagingBufferMemory);
 
 
-        createBuffer(physicalDevice, device, bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                                         VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
                      VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer,
                      vertexBufferMemory);
-        copyBuffer(device, stagingBuffer, vertexBuffer, bufferSize, commandPool, queue);
+        copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
         vkDestroyBuffer(device, stagingBuffer, nullptr);
         vkFreeMemory(device, stagingBufferMemory, nullptr);
     }
 
 
-    uint32_t BufferManager::findMemoryType(VkPhysicalDevice &physicalDevice,
-                                           VkDevice &device, uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
+    uint32_t BufferManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
         VkPhysicalDeviceMemoryProperties memoryProperties;
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
         for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
@@ -50,8 +44,7 @@ namespace Engine::RenderCore::Resource {
         return 0;
     }
 
-    void BufferManager::createBuffer(VkPhysicalDevice &physicalDevice, VkDevice &device, VkDeviceSize deviceSize,
-                                     VkBufferUsageFlags usageFlags,
+    void BufferManager::createBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags,
                                      VkMemoryPropertyFlags propertyFlags, VkBuffer &buffer,
                                      VkDeviceMemory &bufferMemory) {
         VkBufferCreateInfo bufferCreateInfo = {};
@@ -68,7 +61,7 @@ namespace Engine::RenderCore::Resource {
         VkMemoryAllocateInfo memoryAllocateInfo = {};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
-        memoryAllocateInfo.memoryTypeIndex = findMemoryType(physicalDevice, device, memoryRequirements.memoryTypeBits,
+        memoryAllocateInfo.memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits,
                                                             propertyFlags);
         if (vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate buffer memory");
@@ -76,8 +69,7 @@ namespace Engine::RenderCore::Resource {
         vkBindBufferMemory(device, buffer, bufferMemory, 0);
     }
 
-    void BufferManager::copyBuffer(VkDevice &device, VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size,
-                                   VkCommandPool &commandPool, VkQueue &queue) {
+    void BufferManager::copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size) {
         VkCommandBufferAllocateInfo allocateInfo = {};
         allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -102,8 +94,8 @@ namespace Engine::RenderCore::Resource {
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         submitInfo.commandBufferCount = 1;
         submitInfo.pCommandBuffers = &commandBuffer;
-        vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(queue);
+        vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(graphicsQueue);
         vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
     }
 }

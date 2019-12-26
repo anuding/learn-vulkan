@@ -4,7 +4,7 @@
 
 #include "Game.h"
 #include "Command.h"
-
+#include "VKContext.h"
 
 void Engine::Game::update() {
     Application::update();
@@ -20,12 +20,9 @@ void Engine::Game::init() {
 
 Engine::Game::Game(Scene &scene) {
     scenes.push_back(scene);
-    bufferManager.createVertexBuffer(_physicalDevice, _device, _vertexBuffer, _vertexBufferMemory,
-                                     scene.getGameObjects()[0].getMesh().getVertices(),
-                                     _commandPool, _graphicsQueue);
-    RenderCore::CommandHelper::createCommandBuffers(_device, _commandBuffers, _swapChainFrameBuffers, _commandPool,
-                                                    _renderPass, _swapChainExtent, _graphicsPipeline, _vertexBuffer,
-                                                    static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getVertices().size()));
+    bufferManager.createVertexBuffer(scene.getGameObjects()[0].getMesh().getVertices());
+    RenderCore::CommandHelper::createCommandBuffers(
+            static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getVertices().size()));
 }
 
 const std::vector<Scene> &Engine::Game::getScenes() const {
