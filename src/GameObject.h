@@ -9,7 +9,11 @@
 #include <vector>
 class GameObject {
 public:
-    std::vector<Mesh> meshes;
+    Mesh mesh;
+
+    const Mesh &getMesh() const;
+
+    void setMesh(const Mesh &mesh);
 };
 
 

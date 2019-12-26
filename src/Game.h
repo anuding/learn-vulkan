@@ -13,7 +13,16 @@ namespace Engine {
     private:
         std::vector<Scene> scenes;
     public:
+        const Scene &getCurrentScene() const;
+
+        const std::vector<Scene> &getScenes() const;
+
+        void setScenes(const std::vector<Scene> &scenes);
+
+    public:
         Game();
+        Game(Scene &scene);
+
         void init();
         virtual void update() override;
     };

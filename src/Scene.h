@@ -9,8 +9,12 @@
 #include <vector>
 
 class Scene {
-public:
+private:
     std::vector<GameObject> gameObjects;
+public:
+    const std::vector<GameObject> &getGameObjects() const;
+    void addGameObject(GameObject &gameObject);
+    void setGameObjects(const std::vector<GameObject> &gameObjects);
 };
 
 

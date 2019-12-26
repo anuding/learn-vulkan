@@ -15,17 +15,26 @@ Engine::Game::Game() {
 }
 
 void Engine::Game::init() {
-    std::vector<Vertex> vertices = {{{0.0f,  -0.5f, 0.5f},
-                                            {1.0f, 0.4f, 0.0f}},
-                                    {{0.5f,  0.5f,  1.1f},
-                                            {0.0f, 1.0f, 0.2f}},
-                                    {{-0.5f, 0.5f,  1.1f},
-                                            {0.0f, 0.2f, 1.0f}}};
+
+}
+
+Engine::Game::Game(Scene &scene) {
+    scenes.push_back(scene);
     bufferManager.createVertexBuffer(_physicalDevice, _device, _vertexBuffer, _vertexBufferMemory,
-                                     vertices);
+                                     scene.getGameObjects()[0].getMesh().getVertices());
     RenderCore::CommandHelper::createCommandBuffers(_device, _commandBuffers, _swapChainFrameBuffers, _commandPool,
                                                     _renderPass, _swapChainExtent, _graphicsPipeline, _vertexBuffer,
-                                                    static_cast<uint32_t >(vertices.size()));
+                                                    static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getVertices().size()));
+}
 
+const std::vector<Scene> &Engine::Game::getScenes() const {
+    return scenes;
+}
 
+void Engine::Game::setScenes(const std::vector<Scene> &scenes) {
+    Game::scenes = scenes;
+}
+
+const Scene &Engine::Game::getCurrentScene() const {
+    return scenes[0];
 }

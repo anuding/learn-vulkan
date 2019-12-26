@@ -13,6 +13,8 @@ private:
 public:
     const std::vector<Vertex> &getVertices() const;
 
+    void setVertices(const std::vector<Vertex> &vertices);
+
 public:
 
     void init();

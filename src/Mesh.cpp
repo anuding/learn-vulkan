@@ -5,14 +5,12 @@
 #include "Mesh.h"
 
 void Mesh::init() {
-//    vertices = {{{0.0f,  -0.5f, 0.0f},
-//                        {1.0f, 0.0f, 0.0f}},
-//                {{0.5f,  0.5f,  0.0f},
-//                        {0.0f, 1.0f, 0.0f}},
-//                {{-0.5f, 0.5f,  0.0f},
-//                        {0.0f, 0.0f, 1.0f}}};
 }
 
 const std::vector<Vertex> &Mesh::getVertices() const {
     return vertices;
+}
+
+void Mesh::setVertices(const std::vector<Vertex> &vertices) {
+    Mesh::vertices = vertices;
 }
