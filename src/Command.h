@@ -7,6 +7,5 @@
 namespace Engine::RenderCore::CommandHelper {
     void createCommandPool();
 
-    void createCommandBuffers(
-            uint32_t vertexArrayLength);
+    void createCommandBuffers(uint32_t vertexArrayLength, uint16_t indexArrayLength);
 }

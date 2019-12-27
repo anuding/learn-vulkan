@@ -5,8 +5,6 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-namespace Engine::RenderCore {
-    namespace PipelineHelper {
-        void createGraphicsPipelines();
-    }
+namespace Engine::RenderCore::PipelineHelper {
+    void createGraphicsPipelines();
 }

@@ -14,3 +14,11 @@ const std::vector<Vertex> &Mesh::getVertices() const {
 void Mesh::setVertices(const std::vector<Vertex> &vertices) {
     Mesh::vertices = vertices;
 }
+
+const std::vector<uint16_t> &Mesh::getIndices() const {
+    return indices;
+}
+
+void Mesh::setIndices(const std::vector<uint16_t> &indices) {
+    Mesh::indices = indices;
+}

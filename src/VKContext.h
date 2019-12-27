@@ -11,11 +11,24 @@
 #include <vector>
 
 namespace Engine::RenderCore {
+
+#ifdef NDEBUG
+    const bool enableValidationLayers = false;
+#else
+    const bool enableValidationLayers = true;
+#endif
+    const std::vector<const char *> validationLayers = {
+            "VK_LAYER_KHRONOS_validation"
+    };
+    const std::vector<const char *> deviceExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME
+    };
     extern VkDevice device;
     extern VkPhysicalDevice physicalDevice;
     extern VkBuffer vertexBuffer;
     extern VkDeviceMemory vertexBufferMemory;
-
+    extern VkBuffer indexBuffer;
+    extern VkDeviceMemory indexBufferMemory;
     extern std::vector<VkCommandBuffer> commandBuffers;
     extern VkDebugUtilsMessengerEXT debugMessenger;
     extern VkQueue graphicsQueue;

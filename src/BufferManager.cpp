@@ -7,31 +7,6 @@
 #include "VKContext.h"
 
 namespace Engine::RenderCore::Resource {
-
-    void BufferManager::createVertexBuffer(const std::vector<Vertex> &vertices) {
-        VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
-        VkBuffer stagingBuffer;
-        VkDeviceMemory stagingBufferMemory;
-        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                     VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                     VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-                     stagingBufferMemory);
-        void *data;
-        vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, vertices.data(), (size_t) bufferSize);
-        vkUnmapMemory(device, stagingBufferMemory);
-
-
-        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
-                     VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer,
-                     vertexBufferMemory);
-        copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
-        vkDestroyBuffer(device, stagingBuffer, nullptr);
-        vkFreeMemory(device, stagingBufferMemory, nullptr);
-    }
-
-
     uint32_t BufferManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
         VkPhysicalDeviceMemoryProperties memoryProperties;
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
@@ -44,9 +19,9 @@ namespace Engine::RenderCore::Resource {
         return 0;
     }
 
-    void BufferManager::createBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags,
-                                     VkMemoryPropertyFlags propertyFlags, VkBuffer &buffer,
-                                     VkDeviceMemory &bufferMemory) {
+    void BufferManager::allocateBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags,
+                                       VkMemoryPropertyFlags propertyFlags, VkBuffer &buffer,
+                                       VkDeviceMemory &deviceMemory) {
         VkBufferCreateInfo bufferCreateInfo = {};
         bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferCreateInfo.size = deviceSize;
@@ -63,10 +38,10 @@ namespace Engine::RenderCore::Resource {
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
         memoryAllocateInfo.memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits,
                                                             propertyFlags);
-        if (vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+        if (vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &deviceMemory) != VK_SUCCESS) {
             throw std::runtime_error("failed to allocate buffer memory");
         }
-        vkBindBufferMemory(device, buffer, bufferMemory, 0);
+        vkBindBufferMemory(device, buffer, deviceMemory, 0);
     }
 
     void BufferManager::copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size) {

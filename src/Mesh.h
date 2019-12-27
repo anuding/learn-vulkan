@@ -10,6 +10,12 @@
 class Mesh {
 private:
     std::vector<Vertex> vertices;
+    std::vector<uint16_t > indices;
+public:
+    const std::vector<uint16_t> &getIndices() const;
+
+    void setIndices(const std::vector<uint16_t> &indices);
+
 public:
     const std::vector<Vertex> &getVertices() const;
 

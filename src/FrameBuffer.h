@@ -6,9 +6,8 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 
-namespace Engine::RenderCore {
-    namespace FrameBufferHelper {
-        void createFrameBuffers(std::vector<VkFramebuffer> &swapChainFrameBuffers,
-                                std::vector<VkImageView> &swapChainViews);
-    }
+namespace Engine::RenderCore::FrameBufferHelper {
+
+    void createFrameBuffers(std::vector<VkFramebuffer> &swapChainFrameBuffers,
+                            std::vector<VkImageView> &swapChainViews);
 }

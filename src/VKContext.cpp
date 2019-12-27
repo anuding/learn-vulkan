@@ -9,7 +9,8 @@ namespace Engine::RenderCore {
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkBuffer vertexBuffer = VK_NULL_HANDLE;
     VkDeviceMemory vertexBufferMemory = VK_NULL_HANDLE;
-
+    VkBuffer indexBuffer;
+    VkDeviceMemory indexBufferMemory;
     std::vector<VkCommandBuffer> commandBuffers;
     VkDebugUtilsMessengerEXT debugMessenger;
     VkQueue graphicsQueue;

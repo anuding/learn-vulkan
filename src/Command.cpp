@@ -20,7 +20,7 @@ namespace Engine::RenderCore::CommandHelper {
         }
     }
 
-    void createCommandBuffers(uint32_t vertexArrayLength) {
+    void createCommandBuffers(uint32_t vertexArrayLength, uint16_t indexArrayLength) {
         commandBuffers.resize(swapChainFrameBuffers.size());
         VkCommandBufferAllocateInfo commandBufferAllocateInfo = {};
         commandBufferAllocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -59,8 +59,10 @@ namespace Engine::RenderCore::CommandHelper {
             VkDeviceSize offsets[] = {0};
             vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers,
                                    offsets);
-            vkCmdDraw(commandBuffers[i], vertexArrayLength, 1, 0, 0);
-
+            vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+//            vkCmdDraw(commandBuffers[i], vertexArrayLength, 1, 0, 0);
+            vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t >(indexArrayLength), 1,
+                             0, 0, 0);
             vkCmdEndRenderPass(commandBuffers[i]);
             if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {
                 throw std::runtime_error("failed to record command buffer");
