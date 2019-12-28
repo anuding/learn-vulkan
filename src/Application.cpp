@@ -99,9 +99,13 @@ namespace Engine::RenderCore {
 
         RenderPassHelper::createRenderPass();
 
+        bufferManager.createLocalBuffer();
+
         DescriptorHelper::createDescriptorLayout();
 
         DescriptorHelper::createDescriptorPool();
+
+        DescriptorHelper::createDescriptorSets();
 
         PipelineHelper::createGraphicsPipelines();
 

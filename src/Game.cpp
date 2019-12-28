@@ -27,11 +27,6 @@ Engine::Game::Game(Scene &scene) {
     bufferManager.createTransferBuffer(scene.getGameObjects()[0].getMesh().getIndices(),
                                        RenderCore::Resource::RESOURCE_TYPE::INDEX, RenderCore::indexBuffer,
                                        RenderCore::indexBufferMemory);
-    bufferManager.createLocalBuffer();
-
-    RenderCore::DescriptorHelper::createDescriptorSets();
-
-
     RenderCore::CommandHelper::createCommandBuffers(
             static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getVertices().size()),
             static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getIndices().size())
