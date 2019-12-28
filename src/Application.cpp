@@ -109,7 +109,7 @@ namespace Engine::RenderCore {
 
         PipelineHelper::createGraphicsPipelines();
 
-        FrameBufferHelper::createFrameBuffers(swapChainFrameBuffers, swapChainImageViews);
+        FrameBufferHelper::createFrameBuffers();
 
         CommandHelper::createCommandPool();
 

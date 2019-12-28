@@ -8,12 +8,11 @@
 
 namespace Engine::RenderCore::FrameBufferHelper {
 
-    void createFrameBuffers(std::vector<VkFramebuffer> &swapChainFrameBuffers,
-                            std::vector<VkImageView> &swapChainViews) {
-        swapChainFrameBuffers.resize(swapChainViews.size());
-        for (size_t i = 0; i < swapChainViews.size(); i++) {
+    void createFrameBuffers() {
+        swapChainFrameBuffers.resize(swapChainImageViews.size());
+        for (size_t i = 0; i < swapChainImageViews.size(); i++) {
             VkImageView attachments[] = {
-                    swapChainViews[i]
+					swapChainImageViews[i]
             };
 
             VkFramebufferCreateInfo framebufferCreateInfo = {};

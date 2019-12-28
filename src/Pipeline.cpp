@@ -11,8 +11,8 @@ namespace Engine::RenderCore::PipelineHelper {
 
 
     void createGraphicsPipelines() {
-        auto vertShaderCode = ShaderHelper::readFile("../../spv_shaders/vert.spv");
-        auto fragShaderCode = ShaderHelper::readFile("../../spv_shaders/frag.spv");
+        auto vertShaderCode = ShaderHelper::readFile("spv_shaders/vert.spv");
+        auto fragShaderCode = ShaderHelper::readFile("spv_shaders/frag.spv");
         VkShaderModule vertModule = ShaderHelper::createShaderModule(vertShaderCode);
         VkShaderModule fragModule = ShaderHelper::createShaderModule(fragShaderCode);
 
