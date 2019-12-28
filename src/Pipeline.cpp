@@ -74,7 +74,7 @@ namespace Engine::RenderCore::PipelineHelper {
         rasterizationStateCreateInfo.rasterizerDiscardEnable = VK_FALSE;
         rasterizationStateCreateInfo.lineWidth = 1.0f;
         rasterizationStateCreateInfo.cullMode = VK_CULL_MODE_BACK_BIT;
-        rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        rasterizationStateCreateInfo.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         rasterizationStateCreateInfo.depthBiasEnable = VK_FALSE;
         rasterizationStateCreateInfo.depthBiasConstantFactor = 0.0f; // Optional
         rasterizationStateCreateInfo.depthBiasClamp = 0.0f; // Optional
@@ -111,8 +111,8 @@ namespace Engine::RenderCore::PipelineHelper {
 
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCreateInfo.setLayoutCount = 0;
-        pipelineLayoutCreateInfo.pSetLayouts = nullptr;
+        pipelineLayoutCreateInfo.setLayoutCount = 1;
+        pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
         pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 

@@ -40,6 +40,13 @@ namespace Engine::RenderCore {
     extern VkFormat swapChainImageFormat;
     extern VkExtent2D swapChainExtent;
     extern VkRenderPass renderPass;
+    extern VkDescriptorSetLayout descriptorSetLayout;
+    extern VkDescriptorPool descriptorPool;
+    extern std::vector<VkDescriptorSet> descriptorSets;
+
+    extern std::vector<VkBuffer> uniformBuffers;
+    extern std::vector<VkDeviceMemory> uniformBufferMemories;
+
     extern VkPipelineLayout pipelineLayout;
     extern VkPipeline graphicsPipeline;
     extern std::vector<VkFramebuffer> swapChainFrameBuffers;

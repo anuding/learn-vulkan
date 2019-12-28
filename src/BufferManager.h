@@ -14,15 +14,16 @@ namespace Engine::RenderCore::Resource {
 
     enum RESOURCE_TYPE {
         VERTEX,
-        INDEX
+        INDEX,
+        UNIFORM
     };
 
     class BufferManager {
 
     public:
-        template<class T>
-        void createBuffer(const std::vector<T> &resources, RESOURCE_TYPE resourceType, VkBuffer &buffer,
-                          VkDeviceMemory &bufferMemory) {
+        template<class ResourceType>
+        void createTransferBuffer(const std::vector<ResourceType> &resources, RESOURCE_TYPE resourceType, VkBuffer &buffer,
+                                  VkDeviceMemory &bufferMemory) {
             VkDeviceSize bufferSize = sizeof(resources[0]) * resources.size();
             VkBuffer stagingBuffer;
             VkDeviceMemory stagingBufferMemory;
@@ -50,6 +51,7 @@ namespace Engine::RenderCore::Resource {
             vkFreeMemory(device, stagingBufferMemory, nullptr);
         }
 
+        void createLocalBuffer();
     private:
         void allocateBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags,
                             VkBuffer &buffer, VkDeviceMemory &deviceMemory);

@@ -61,6 +61,11 @@ namespace Engine::RenderCore::CommandHelper {
                                    offsets);
             vkCmdBindIndexBuffer(commandBuffers[i], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 //            vkCmdDraw(commandBuffers[i], vertexArrayLength, 1, 0, 0);
+
+            vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+                                    pipelineLayout, 0, 1,
+                                    &descriptorSets[i], 0,
+                                    nullptr);
             vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t >(indexArrayLength), 1,
                              0, 0, 0);
             vkCmdEndRenderPass(commandBuffers[i]);

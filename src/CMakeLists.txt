@@ -16,7 +16,7 @@ ADD_LIBRARY(ENGINE_CORE #SHARED
         GameObject.cpp
         Mesh.cpp
         BufferManager.cpp
-        VKContext.cpp VKContext.h Instance.cpp Instance.h)
+        VKContext.cpp VKContext.h Instance.cpp Instance.h Descriptor.cpp Descriptor.h)
 
 
 ADD_EXECUTABLE(engine main.cpp)
@@ -50,7 +50,3 @@ IF (WIN32)
     TARGET_LINK_LIBRARIES(engine glfw3)
     TARGET_LINK_LIBRARIES(engine vulkan-1)
 ENDIF ()
-#MESSAGE(!!!!!)
-#if(var)
-#    MESSAGE(dwqwdwq)
-#ENDIF()

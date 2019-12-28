@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include "BufferManager.h"
 #include "VKContext.h"
+#include "Shader.h"
 
 namespace Engine::RenderCore::Resource {
     uint32_t BufferManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
@@ -72,5 +73,17 @@ namespace Engine::RenderCore::Resource {
         vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
         vkQueueWaitIdle(graphicsQueue);
         vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+    }
+
+    void BufferManager::createLocalBuffer() {
+        VkDeviceSize bufferSize = sizeof(ShaderHelper::UniformBufferObject);
+        uniformBuffers.resize(swapChainImages.size());
+        uniformBufferMemories.resize(swapChainImages.size());
+
+        for (size_t i = 0; i < swapChainImages.size(); i++) {
+            allocateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                           uniformBuffers[i], uniformBufferMemories[i]);
+        }
     }
 }

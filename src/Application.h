@@ -37,5 +37,7 @@ namespace Engine::RenderCore {
         virtual void drawFrame();
 
         virtual void update();
+
+        void updateUniformBuffer(uint32_t index);
     };
 }

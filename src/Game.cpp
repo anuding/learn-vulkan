@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "Command.h"
 #include "VKContext.h"
+#include "Descriptor.h"
 
 void Engine::Game::update() {
     Application::update();
@@ -20,12 +21,17 @@ void Engine::Game::init() {
 
 Engine::Game::Game(Scene &scene) {
     scenes.push_back(scene);
-    bufferManager.createBuffer(scene.getGameObjects()[0].getMesh().getVertices(),
-                               RenderCore::Resource::RESOURCE_TYPE::VERTEX, RenderCore::vertexBuffer,
-                               RenderCore::vertexBufferMemory);
-    bufferManager.createBuffer(scene.getGameObjects()[0].getMesh().getIndices(),
-                               RenderCore::Resource::RESOURCE_TYPE::INDEX, RenderCore::indexBuffer,
-                               RenderCore::indexBufferMemory);
+    bufferManager.createTransferBuffer(scene.getGameObjects()[0].getMesh().getVertices(),
+                                       RenderCore::Resource::RESOURCE_TYPE::VERTEX, RenderCore::vertexBuffer,
+                                       RenderCore::vertexBufferMemory);
+    bufferManager.createTransferBuffer(scene.getGameObjects()[0].getMesh().getIndices(),
+                                       RenderCore::Resource::RESOURCE_TYPE::INDEX, RenderCore::indexBuffer,
+                                       RenderCore::indexBufferMemory);
+    bufferManager.createLocalBuffer();
+
+    RenderCore::DescriptorHelper::createDescriptorSets();
+
+
     RenderCore::CommandHelper::createCommandBuffers(
             static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getVertices().size()),
             static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getIndices().size())
