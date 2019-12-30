@@ -5,6 +5,7 @@
 #include "VKContext.h"
 
 namespace Engine::RenderCore {
+
     VkDevice device;
     VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
     VkBuffer vertexBuffer = VK_NULL_HANDLE;
@@ -39,5 +40,10 @@ namespace Engine::RenderCore {
     std::vector<VkFence> inFlightFences;
     GLFWwindow *window;
     VkInstance instance;
+
+    const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+    const uint32_t WIDTH = 800;
+    const uint32_t HEIGHT = 600;
+    RenderCore::Resource::AssetManager assetManager;
 }
 

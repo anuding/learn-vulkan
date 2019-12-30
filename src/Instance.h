@@ -9,6 +9,8 @@
 #include <vector>
 
 namespace Engine::RenderCore::InstanceHelper {
+    void init();
+
     void createInstance();
 
     std::vector<const char *> getRequiredExtensions();

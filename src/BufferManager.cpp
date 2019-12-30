@@ -6,6 +6,7 @@
 #include "BufferManager.h"
 #include "VKContext.h"
 #include "Shader.h"
+#include "Asset.h"
 
 namespace Engine::RenderCore::Resource {
     uint32_t BufferManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
@@ -75,7 +76,7 @@ namespace Engine::RenderCore::Resource {
         vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
     }
 
-    void BufferManager::createLocalBuffer() {
+    void BufferManager::createUniformBuffer() {
         VkDeviceSize bufferSize = sizeof(ShaderHelper::UniformBufferObject);
         uniformBuffers.resize(swapChainImages.size());
         uniformBufferMemories.resize(swapChainImages.size());
@@ -84,6 +85,112 @@ namespace Engine::RenderCore::Resource {
             allocateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
                            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                            uniformBuffers[i], uniformBufferMemories[i]);
+        }
+    }
+
+    void BufferManager::createVertexBuffer(const std::vector<Vertex> &resources, RESOURCE_TYPE resourceType,
+                                           VkBuffer &buffer, VkDeviceMemory &bufferMemory) {
+        VkDeviceSize bufferSize = sizeof(resources[0]) * resources.size();
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                       stagingBufferMemory);
+        void *data;
+        vkMapMemory(RenderCore::device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, resources.data(), (size_t) bufferSize);
+        vkUnmapMemory(RenderCore::device, stagingBufferMemory);
+
+        VkBufferUsageFlags bufferUsageFlag;
+        if (resourceType == VERTEX)
+            bufferUsageFlag = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        if (resourceType == INDEX)
+            bufferUsageFlag = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+
+        allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                   bufferUsageFlag,
+                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer,
+                       bufferMemory);
+        copyBuffer(stagingBuffer, buffer, bufferSize);
+        vkDestroyBuffer(RenderCore::device, stagingBuffer, nullptr);
+        vkFreeMemory(RenderCore::device, stagingBufferMemory, nullptr);
+    }
+
+    void BufferManager::createIndexBuffer(const std::vector<uint16_t> &resources, RESOURCE_TYPE resourceType,
+                                          VkBuffer &buffer, VkDeviceMemory &bufferMemory) {
+        VkDeviceSize bufferSize = sizeof(resources[0]) * resources.size();
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingBufferMemory;
+        allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                       stagingBufferMemory);
+        void *data;
+        vkMapMemory(RenderCore::device, stagingBufferMemory, 0, bufferSize, 0, &data);
+        memcpy(data, resources.data(), (size_t) bufferSize);
+        vkUnmapMemory(RenderCore::device, stagingBufferMemory);
+
+        VkBufferUsageFlags bufferUsageFlag;
+        if (resourceType == VERTEX)
+            bufferUsageFlag = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        if (resourceType == INDEX)
+            bufferUsageFlag = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+
+        allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                   bufferUsageFlag,
+                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer,
+                       bufferMemory);
+        copyBuffer(stagingBuffer, buffer, bufferSize);
+        vkDestroyBuffer(RenderCore::device, stagingBuffer, nullptr);
+        vkFreeMemory(RenderCore::device, stagingBufferMemory, nullptr);
+    }
+
+    void BufferManager::init(Scene &scene) {
+        createVertexBuffer(scene.getGameObjects()[0].getMesh().getVertices(), VERTEX, vertexBuffer, vertexBufferMemory);
+        createIndexBuffer(scene.getGameObjects()[0].getMesh().getIndices(), INDEX, indexBuffer, indexBufferMemory);
+        createUniformBuffer();
+        createTextureBuffer();
+    }
+
+    void BufferManager::createTextureBuffer() {
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingMemory;
+        auto m = assetManager.getAssetMap();
+        for (auto asset = m.begin(); asset != m.end(); ++asset) {
+            auto name = asset->first;
+            auto metainfo = asset->second.getMetaInfo();
+
+            allocateBuffer(metainfo.size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                           stagingBuffer, stagingMemory);
+            void *data;
+            vkMapMemory(device, stagingMemory, 0, metainfo.size, 0, &data);
+            memcpy(data, asset->second.getData(), static_cast<size_t >(metainfo.size));
+            vkUnmapMemory(device, stagingMemory);
+            VkImage textureImage;
+            VkDeviceMemory textureImageMemory;
+            VkImageCreateInfo createInfo = {};
+            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+            createInfo.imageType = VK_IMAGE_TYPE_2D;
+            createInfo.extent.width = static_cast<uint32_t >(metainfo.width);
+            createInfo.extent.height = static_cast<uint32_t >(metainfo.height);
+            createInfo.extent.depth = 1;
+            createInfo.mipLevels = 1;
+            createInfo.arrayLayers = 1;
+            createInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+            createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+            createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+            createInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT
+                    | VK_IMAGE_USAGE_SAMPLED_BIT;
+            createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+            createInfo.flags = 0;
+            if(vkCreateImage(device,&createInfo, nullptr,&textureImage)!=VK_SUCCESS){
+                throw std::runtime_error("failed to create image");
+            }
+
+
         }
     }
 }

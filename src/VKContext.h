@@ -9,6 +9,8 @@
 
 #include <vulkan/vulkan.h>
 #include <vector>
+#include "BufferManager.h"
+#include "AssetManager.h"
 
 namespace Engine::RenderCore {
 
@@ -40,6 +42,7 @@ namespace Engine::RenderCore {
     extern VkFormat swapChainImageFormat;
     extern VkExtent2D swapChainExtent;
     extern VkRenderPass renderPass;
+
     extern VkDescriptorSetLayout descriptorSetLayout;
     extern VkDescriptorPool descriptorPool;
     extern std::vector<VkDescriptorSet> descriptorSets;
@@ -57,6 +60,12 @@ namespace Engine::RenderCore {
     extern std::vector<VkFence> inFlightFences;
     extern GLFWwindow *window;
     extern VkInstance instance;
+
+
+    extern const uint32_t MAX_FRAMES_IN_FLIGHT;
+    extern const uint32_t WIDTH ;
+    extern const uint32_t HEIGHT;
+    extern Resource::AssetManager assetManager;
 }
 
 

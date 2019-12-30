@@ -4,7 +4,6 @@
 
 #include "Shader.h"
 #include "VKContext.h"
-#include <filesystem>
 #include <iostream>
 #include <string>
 namespace Engine::RenderCore::ShaderHelper {

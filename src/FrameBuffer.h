@@ -8,5 +8,6 @@
 
 namespace Engine::RenderCore::FrameBufferHelper {
 
+    void init();
     void createFrameBuffers();
 }

@@ -91,4 +91,8 @@ namespace Engine::RenderCore::InstanceHelper{
         }
     }
 
+    void init() {
+        createInstance();
+    }
+
 }

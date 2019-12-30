@@ -9,8 +9,8 @@
 #include <vulkan/vulkan.h>
 #include "Vertex.h"
 #include "VKContext.h"
-
-namespace Engine::RenderCore::Resource {
+#include "Scene.h"
+namespace Engine::RenderCore::Resource::BufferManager {
 
     enum RESOURCE_TYPE {
         VERTEX,
@@ -18,48 +18,25 @@ namespace Engine::RenderCore::Resource {
         UNIFORM
     };
 
-    class BufferManager {
+    void init(Scene &scene);
 
-    public:
-        template<class ResourceType>
-        void createTransferBuffer(const std::vector<ResourceType> &resources, RESOURCE_TYPE resourceType, VkBuffer &buffer,
-                                  VkDeviceMemory &bufferMemory) {
-            VkDeviceSize bufferSize = sizeof(resources[0]) * resources.size();
-            VkBuffer stagingBuffer;
-            VkDeviceMemory stagingBufferMemory;
-            allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-                           stagingBufferMemory);
-            void *data;
-            vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-            memcpy(data, resources.data(), (size_t) bufferSize);
-            vkUnmapMemory(device, stagingBufferMemory);
+    void createTextureBuffer();
 
-            VkBufferUsageFlags bufferUsageFlag;
-            if (resourceType == VERTEX)
-                bufferUsageFlag = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-            if (resourceType == INDEX)
-                bufferUsageFlag = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    void createVertexBuffer(const std::vector<Vertex> &resources, RESOURCE_TYPE resourceType, VkBuffer &buffer,
+                            VkDeviceMemory &bufferMemory);
 
-            allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                       bufferUsageFlag,
-                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer,
-                           bufferMemory);
-            copyBuffer(stagingBuffer, buffer, bufferSize);
-            vkDestroyBuffer(device, stagingBuffer, nullptr);
-            vkFreeMemory(device, stagingBufferMemory, nullptr);
-        }
+    void createIndexBuffer(const std::vector<uint16_t> &resources, RESOURCE_TYPE resourceType, VkBuffer &buffer,
+                           VkDeviceMemory &bufferMemory);
 
-        void createLocalBuffer();
-    private:
-        void allocateBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags,
-                            VkBuffer &buffer, VkDeviceMemory &deviceMemory);
+    void createUniformBuffer();
 
-        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+    void allocateBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags,
+                        VkBuffer &buffer, VkDeviceMemory &deviceMemory);
 
-        void copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size);
-    };
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+
+    void copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size);
+
 }
 
 

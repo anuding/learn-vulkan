@@ -142,4 +142,10 @@ namespace Engine::RenderCore::SwapChainHelper {
         }
         return details;
     }
+
+    void init() {
+        createSwapChain(WIDTH, HEIGHT);
+
+        createImageViews();
+    }
 }

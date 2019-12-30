@@ -10,6 +10,8 @@
 
 namespace Engine::RenderCore::DeviceHelper {
 
+    void init();
+
     void pickPhysicalDevice();
 
     void createLogicalDevice();

@@ -42,19 +42,9 @@ namespace Engine::RenderCore::DescriptorHelper {
 
     }
 
+
+
     void createDescriptorSets() {
-        std::vector<VkDescriptorSetLayout> layouts(swapChainImages.size(), descriptorSetLayout);
-        VkDescriptorSetAllocateInfo setAllocateInfo = {};
-        setAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-        setAllocateInfo.descriptorPool = descriptorPool;
-        setAllocateInfo.pSetLayouts = layouts.data();
-        setAllocateInfo.descriptorSetCount = static_cast<uint32_t > (swapChainImages.size());
-
-        descriptorSets.resize(swapChainImages.size());
-        if (vkAllocateDescriptorSets(device, &setAllocateInfo, descriptorSets.data()) != VK_SUCCESS) {
-            throw std::runtime_error("failed to allocate descriptor sets");
-        }
-
         for (size_t i = 0; i < swapChainImages.size(); i++) {
             VkDescriptorBufferInfo bufferInfo = {};
             bufferInfo.buffer = uniformBuffers[i];
@@ -73,8 +63,27 @@ namespace Engine::RenderCore::DescriptorHelper {
             descriptorWrite.pTexelBufferView = nullptr;
 
             vkUpdateDescriptorSets(device, 1, &descriptorWrite, 0, nullptr);
-
         }
+    }
+
+    void allocateDescriptorSets() {
+        std::vector<VkDescriptorSetLayout> layouts(swapChainImages.size(), descriptorSetLayout);
+        VkDescriptorSetAllocateInfo setAllocateInfo = {};
+        setAllocateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+        setAllocateInfo.descriptorPool = descriptorPool;
+        setAllocateInfo.pSetLayouts = layouts.data();
+        setAllocateInfo.descriptorSetCount = static_cast<uint32_t > (swapChainImages.size());
+
+        descriptorSets.resize(swapChainImages.size());
+        if (vkAllocateDescriptorSets(device, &setAllocateInfo, descriptorSets.data()) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate descriptor sets");
+        }
+    }
+
+    void init() {
+        createDescriptorLayout();
+        createDescriptorPool();
+        allocateDescriptorSets();
     }
 
 }

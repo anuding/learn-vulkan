@@ -49,5 +49,9 @@ namespace Engine::RenderCore::RenderPassHelper {
             throw std::runtime_error("failed to create render pass");
         }
     }
+
+    void init() {
+        createRenderPass();
+    }
 }
 

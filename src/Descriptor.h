@@ -7,9 +7,13 @@
 
 #include "VKContext.h"
 namespace Engine::RenderCore::DescriptorHelper{
+    void init();
+
     void createDescriptorLayout();
 
     void createDescriptorPool();
+
+    void allocateDescriptorSets();
 
     void createDescriptorSets();
 }

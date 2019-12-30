@@ -6,6 +6,8 @@
 
 namespace Engine::RenderCore::RenderPassHelper {
 
+    void init();
+
     void createRenderPass();
 
 }

@@ -10,12 +10,11 @@ namespace Engine::RenderCore {
     class Application {
 
     private:
-        const uint32_t WIDTH = 800;
-        const uint32_t HEIGHT = 600;
-        const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+//        const uint32_t WIDTH = 800;
+//        const uint32_t HEIGHT = 600;
+//        const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
 
     public:
-        Resource::BufferManager bufferManager;
         std::chrono::system_clock::time_point a = std::chrono::system_clock::now();
         std::chrono::system_clock::time_point b = std::chrono::system_clock::now();
 

@@ -7,6 +7,7 @@
 
 #include "Application.h"
 #include "Scene.h"
+#include "AssetManager.h"
 #include <vector>
 namespace Engine {
     class Game : public Engine::RenderCore::Application {

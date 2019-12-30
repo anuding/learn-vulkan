@@ -7,10 +7,7 @@
 
 namespace Engine::RenderCore::SemaphoreHelper {
 
-    void createSyncObjects(std::vector<VkSemaphore> &imageAvailableSemaphores,
-                           std::vector<VkSemaphore> &renderFinishedSemaphores,
-                           std::vector<VkFence> &inFlightFences,
-                           size_t MAX_FRAMES_IN_FLIGHT) {
+    void createSyncObjects() {
         imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
         inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
@@ -29,5 +26,9 @@ namespace Engine::RenderCore::SemaphoreHelper {
                 throw std::runtime_error("failed to create semaphores");
             }
         }
+    }
+
+    void init() {
+        createSyncObjects();
     }
 }

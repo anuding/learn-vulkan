@@ -14,6 +14,8 @@ namespace Engine::RenderCore::SwapChainHelper {
         std::vector<VkPresentModeKHR> presentModes;
     };
 
+    void init();
+
     void createSwapChain(uint32_t width, uint32_t height);
 
     void createImageViews();

@@ -23,18 +23,22 @@ namespace Engine::RenderCore {
         initVulkan();
     }
 
-    void Application::run() {
-
-        mainLoop();
-        cleanUp();
-    }
-
-
     void Application::initWindow() {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_FALSE);
         window = glfwCreateWindow(WIDTH, HEIGHT, "EngineTest", nullptr, nullptr);
+    }
+
+    void Application::run() {
+        mainLoop();
+        cleanUp();
+    }
+
+    void Application::createSurface() {
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create window surface!");
+        }
     }
 
     void Application::cleanUp() {
@@ -83,41 +87,27 @@ namespace Engine::RenderCore {
     }
 
     void Application::initVulkan() {
-        InstanceHelper::createInstance();
 
+        InstanceHelper::init();
         DebugUtils::setupDebugMessenger(enableValidationLayers);
 
         createSurface();
 
-        DeviceHelper::pickPhysicalDevice();
+        DeviceHelper::init();
 
-        DeviceHelper::createLogicalDevice();
+        SwapChainHelper::init();
 
-        SwapChainHelper::createSwapChain(WIDTH, HEIGHT);
+        RenderPassHelper::init();
 
-        SwapChainHelper::createImageViews();
+        FrameBufferHelper::init();
 
-        RenderPassHelper::createRenderPass();
+        DescriptorHelper::init();
 
-        bufferManager.createLocalBuffer();
+        CommandHelper::init();
 
-        DescriptorHelper::createDescriptorLayout();
+        SemaphoreHelper::init();
 
-        DescriptorHelper::createDescriptorPool();
-
-        DescriptorHelper::createDescriptorSets();
-
-        PipelineHelper::createGraphicsPipelines();
-
-        FrameBufferHelper::createFrameBuffers();
-
-        CommandHelper::createCommandPool();
-
-
-        SemaphoreHelper::createSyncObjects(imageAvailableSemaphores, renderFinishedSemaphores,
-                                           inFlightFences, MAX_FRAMES_IN_FLIGHT);
-
-
+        PipelineHelper::init();
     }
 
     void Application::mainLoop() {
@@ -138,12 +128,6 @@ namespace Engine::RenderCore {
         vkDeviceWaitIdle(device);
     }
 
-
-    void Application::createSurface() {
-        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create window surface!");
-        }
-    }
 
     void Application::drawFrame() {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
@@ -196,7 +180,6 @@ namespace Engine::RenderCore {
                                 glm::radians(degree),
                                 glm::vec3(0.0f, 0.0f, 1.0f));
         degree += 0.5f;
-        std::cout << degree << std::endl;
         ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
                                glm::vec3(0.0f, 0.0f, 0.0f),
                                glm::vec3(0.0f, 0.0f, 1.0f));

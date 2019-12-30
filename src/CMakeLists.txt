@@ -1,27 +1,28 @@
+include_directories(3rd)
+
 IF (UNIX)
     MESSAGE(STATUS "Current platform: UNIX ")
+    file(COPY ../assets DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
-    file(COPY spv_shaders DESTINATION ${CMAKE_BINARY_DIR}/bin)
-
-	ADD_LIBRARY(ENGINE_CORE #SHARED
-        Application.cpp
-        Semaphore.cpp
-        Pipeline.cpp
-        SwapChain.cpp
-        Shader.cpp
-        Command.cpp
-        RenderPass.cpp
-        FrameBuffer.cpp
-        Queue.cpp
-        ValidationLayer.cpp
-        Device.cpp
-        Vertex.cpp
-        Scene.cpp
-        Game.cpp
-        GameObject.cpp
-        Mesh.cpp
-        BufferManager.cpp
-        VKContext.cpp VKContext.h Instance.cpp Instance.h Descriptor.cpp Descriptor.h)
+    ADD_LIBRARY(ENGINE_CORE #SHARED
+            Application.cpp
+            Semaphore.cpp
+            Pipeline.cpp
+            SwapChain.cpp
+            Shader.cpp
+            Command.cpp
+            RenderPass.cpp
+            FrameBuffer.cpp
+            Queue.cpp
+            ValidationLayer.cpp
+            Device.cpp
+            Vertex.cpp
+            Scene.cpp
+            Game.cpp
+            GameObject.cpp
+            Mesh.cpp
+            BufferManager.cpp
+            VKContext.cpp VKContext.h Instance.cpp Instance.h Descriptor.cpp Descriptor.h AssetManager.cpp AssetManager.h Asset.cpp Asset.h Surface.cpp Surface.h)
     ADD_EXECUTABLE(engine main.cpp)
     TARGET_LINK_LIBRARIES(engine ENGINE_CORE)
 
@@ -33,17 +34,17 @@ IF (UNIX)
     TARGET_LINK_LIBRARIES(engine glfw)
     TARGET_LINK_LIBRARIES(engine Vulkan::Vulkan)
 
-#    TARGET_COMPILE_DEFINITIONS(ENGINE_CORE PRIVATE VK_USE_PLATFORM_XCB_KHR)
-#    TARGET_INCLUDE_DIRECTORIES(ENGINE_CORE PRIVATE Vulkan::Vulkan)
-#    TARGET_LINK_LIBRARIES(ENGINE_CORE glfw)
-#    TARGET_LINK_LIBRARIES(ENGINE_CORE Vulkan::Vulkan)
+    #    TARGET_COMPILE_DEFINITIONS(ENGINE_CORE PRIVATE VK_USE_PLATFORM_XCB_KHR)
+    #    TARGET_INCLUDE_DIRECTORIES(ENGINE_CORE PRIVATE Vulkan::Vulkan)
+    #    TARGET_LINK_LIBRARIES(ENGINE_CORE glfw)
+    #    TARGET_LINK_LIBRARIES(ENGINE_CORE Vulkan::Vulkan)
 ENDIF ()
 
 
 IF (WIN32)
     MESSAGE(STATUS "current platform: WIN32 ")
-    
-    file(COPY spv_shaders DESTINATION ${CMAKE_BINARY_DIR}/bin)
+
+    file(COPY ../assets/spv_shaders DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
     INCLUDE_DIRECTORIES(D:\\CG_SDKS\\glfw-3.3.bin.WIN64\\include)
     LINK_DIRECTORIES(D:\\CG_SDKS\\glfw-3.3.bin.WIN64\\lib-vc2017)
@@ -51,27 +52,27 @@ IF (WIN32)
     INCLUDE_DIRECTORIES(D:\\CG_SDKS\\VulkanSDK\\1.1.121.2\\Include)
     LINK_DIRECTORIES(D:\\CG_SDKS\\VulkanSDK\\1.1.121.2\\Lib)
 
-	INCLUDE_DIRECTORIES(D:\\CG_SDKS\\glm)
+    INCLUDE_DIRECTORIES(D:\\CG_SDKS\\glm)
 
-	ADD_LIBRARY(ENGINE_CORE #SHARED
-        Application.cpp
-        Semaphore.cpp
-        Pipeline.cpp
-        SwapChain.cpp
-        Shader.cpp
-        Command.cpp
-        RenderPass.cpp
-        FrameBuffer.cpp
-        Queue.cpp
-        ValidationLayer.cpp
-        Device.cpp
-        Vertex.cpp
-        Scene.cpp
-        Game.cpp
-        GameObject.cpp
-        Mesh.cpp
-        BufferManager.cpp
-        VKContext.cpp VKContext.h Instance.cpp Instance.h Descriptor.cpp Descriptor.h)
+    ADD_LIBRARY(ENGINE_CORE #SHARED
+            Application.cpp
+            Semaphore.cpp
+            Pipeline.cpp
+            SwapChain.cpp
+            Shader.cpp
+            Command.cpp
+            RenderPass.cpp
+            FrameBuffer.cpp
+            Queue.cpp
+            ValidationLayer.cpp
+            Device.cpp
+            Vertex.cpp
+            Scene.cpp
+            Game.cpp
+            GameObject.cpp
+            Mesh.cpp
+            BufferManager.cpp
+            VKContext.cpp VKContext.h Instance.cpp Instance.h Descriptor.cpp Descriptor.h AssetManager.cpp AssetManager.h Asset.cpp Asset.h Surface.cpp Surface.h)
 
 
     ADD_EXECUTABLE(engine main.cpp)
