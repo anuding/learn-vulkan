@@ -8,10 +8,10 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 #include "Vertex.h"
-#include "VKContext.h"
 #include "Scene.h"
-namespace Engine::RenderCore::Resource::BufferManager {
+#include "VKContext.h"
 
+namespace Engine::RenderCore::BufferManager {
     enum RESOURCE_TYPE {
         VERTEX,
         INDEX,
@@ -30,10 +30,20 @@ namespace Engine::RenderCore::Resource::BufferManager {
 
     void createUniformBuffer();
 
-    void allocateBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags,
-                        VkBuffer &buffer, VkDeviceMemory &deviceMemory);
+    void createBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkBuffer &buffer);
+
+    void allocateBufferMemory(VkMemoryPropertyFlags propertyFlags, VkBuffer &buffer,
+                              VkDeviceMemory &deviceMemory);
+
+    void allocateImageMemory(VkMemoryPropertyFlags propertyFlags, VkImage &image,
+                             VkDeviceMemory &deviceMemory);
 
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+
+    template<class T>
+    void testFunc1(T b) {
+        auto a = Engine::RenderCore::device;
+    }
 
     void copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size);
 

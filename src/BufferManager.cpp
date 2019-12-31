@@ -6,10 +6,9 @@
 #include "BufferManager.h"
 #include "VKContext.h"
 #include "Shader.h"
-#include "Asset.h"
 
-namespace Engine::RenderCore::Resource {
-    uint32_t BufferManager::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
+namespace Engine::RenderCore::BufferManager {
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
         VkPhysicalDeviceMemoryProperties memoryProperties;
         vkGetPhysicalDeviceMemoryProperties(physicalDevice, &memoryProperties);
         for (uint32_t i = 0; i < memoryProperties.memoryTypeCount; i++) {
@@ -21,9 +20,7 @@ namespace Engine::RenderCore::Resource {
         return 0;
     }
 
-    void BufferManager::allocateBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags,
-                                       VkMemoryPropertyFlags propertyFlags, VkBuffer &buffer,
-                                       VkDeviceMemory &deviceMemory) {
+    void createBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkBuffer &buffer) {
         VkBufferCreateInfo bufferCreateInfo = {};
         bufferCreateInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
         bufferCreateInfo.size = deviceSize;
@@ -32,9 +29,13 @@ namespace Engine::RenderCore::Resource {
         if (vkCreateBuffer(device, &bufferCreateInfo, nullptr, &buffer) != VK_SUCCESS) {
             throw std::runtime_error("failed to create buffer");
         }
+    }
 
+    void allocateBufferMemory(VkMemoryPropertyFlags propertyFlags, VkBuffer &buffer,
+                              VkDeviceMemory &deviceMemory) {
         VkMemoryRequirements memoryRequirements;
         vkGetBufferMemoryRequirements(device, buffer, &memoryRequirements);
+
         VkMemoryAllocateInfo memoryAllocateInfo = {};
         memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         memoryAllocateInfo.allocationSize = memoryRequirements.size;
@@ -46,7 +47,23 @@ namespace Engine::RenderCore::Resource {
         vkBindBufferMemory(device, buffer, deviceMemory, 0);
     }
 
-    void BufferManager::copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size) {
+    void allocateImageMemory(VkMemoryPropertyFlags propertyFlags, VkImage &image,
+                             VkDeviceMemory &deviceMemory) {
+        VkMemoryRequirements memoryRequirements;
+        vkGetImageMemoryRequirements(device, image, &memoryRequirements);
+
+        VkMemoryAllocateInfo memoryAllocateInfo = {};
+        memoryAllocateInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        memoryAllocateInfo.allocationSize = memoryRequirements.size;
+        memoryAllocateInfo.memoryTypeIndex = findMemoryType(memoryRequirements.memoryTypeBits,
+                                                            propertyFlags);
+        if (vkAllocateMemory(device, &memoryAllocateInfo, nullptr, &deviceMemory) != VK_SUCCESS) {
+            throw std::runtime_error("failed to allocate image memory");
+        }
+        vkBindImageMemory(device, image, deviceMemory, 0);
+    }
+
+    void copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size) {
         VkCommandBufferAllocateInfo allocateInfo = {};
         allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -76,27 +93,28 @@ namespace Engine::RenderCore::Resource {
         vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
     }
 
-    void BufferManager::createUniformBuffer() {
+    void createUniformBuffer() {
         VkDeviceSize bufferSize = sizeof(ShaderHelper::UniformBufferObject);
         uniformBuffers.resize(swapChainImages.size());
         uniformBufferMemories.resize(swapChainImages.size());
 
         for (size_t i = 0; i < swapChainImages.size(); i++) {
-            allocateBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
-                           uniformBuffers[i], uniformBufferMemories[i]);
+            createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, uniformBuffers[i]);
+            allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                                 uniformBuffers[i], uniformBufferMemories[i]);
         }
     }
 
-    void BufferManager::createVertexBuffer(const std::vector<Vertex> &resources, RESOURCE_TYPE resourceType,
-                                           VkBuffer &buffer, VkDeviceMemory &bufferMemory) {
+    void createVertexBuffer(const std::vector<Vertex> &resources, RESOURCE_TYPE resourceType,
+                            VkBuffer &buffer, VkDeviceMemory &bufferMemory) {
         VkDeviceSize bufferSize = sizeof(resources[0]) * resources.size();
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
-        allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-                       stagingBufferMemory);
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer);
+        allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                             stagingBufferMemory);
+
         void *data;
         vkMapMemory(RenderCore::device, stagingBufferMemory, 0, bufferSize, 0, &data);
         memcpy(data, resources.data(), (size_t) bufferSize);
@@ -108,24 +126,24 @@ namespace Engine::RenderCore::Resource {
         if (resourceType == INDEX)
             bufferUsageFlag = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
-        allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                   bufferUsageFlag,
-                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer,
-                       bufferMemory);
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                 bufferUsageFlag, buffer);
+        allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer,
+                             bufferMemory);
         copyBuffer(stagingBuffer, buffer, bufferSize);
         vkDestroyBuffer(RenderCore::device, stagingBuffer, nullptr);
         vkFreeMemory(RenderCore::device, stagingBufferMemory, nullptr);
     }
 
-    void BufferManager::createIndexBuffer(const std::vector<uint16_t> &resources, RESOURCE_TYPE resourceType,
-                                          VkBuffer &buffer, VkDeviceMemory &bufferMemory) {
+    void createIndexBuffer(const std::vector<uint16_t> &resources, RESOURCE_TYPE resourceType,
+                           VkBuffer &buffer, VkDeviceMemory &bufferMemory) {
         VkDeviceSize bufferSize = sizeof(resources[0]) * resources.size();
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingBufferMemory;
-        allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                       VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                       VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-                       stagingBufferMemory);
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer);
+        allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
+                             VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
+                             stagingBufferMemory);
         void *data;
         vkMapMemory(RenderCore::device, stagingBufferMemory, 0, bufferSize, 0, &data);
         memcpy(data, resources.data(), (size_t) bufferSize);
@@ -137,23 +155,23 @@ namespace Engine::RenderCore::Resource {
         if (resourceType == INDEX)
             bufferUsageFlag = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
 
-        allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                   bufferUsageFlag,
-                       VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer,
-                       bufferMemory);
+        createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+                                 bufferUsageFlag, buffer);
+        allocateBufferMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer,
+                             bufferMemory);
         copyBuffer(stagingBuffer, buffer, bufferSize);
         vkDestroyBuffer(RenderCore::device, stagingBuffer, nullptr);
         vkFreeMemory(RenderCore::device, stagingBufferMemory, nullptr);
     }
 
-    void BufferManager::init(Scene &scene) {
+    void init(Scene &scene) {
         createVertexBuffer(scene.getGameObjects()[0].getMesh().getVertices(), VERTEX, vertexBuffer, vertexBufferMemory);
         createIndexBuffer(scene.getGameObjects()[0].getMesh().getIndices(), INDEX, indexBuffer, indexBufferMemory);
         createUniformBuffer();
         createTextureBuffer();
     }
 
-    void BufferManager::createTextureBuffer() {
+    void createTextureBuffer() {
         VkBuffer stagingBuffer;
         VkDeviceMemory stagingMemory;
         auto m = assetManager.getAssetMap();
@@ -161,9 +179,9 @@ namespace Engine::RenderCore::Resource {
             auto name = asset->first;
             auto metainfo = asset->second.getMetaInfo();
 
-            allocateBuffer(metainfo.size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
-                           stagingBuffer, stagingMemory);
+            createBuffer(metainfo.size, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, stagingBuffer);
+            allocateBufferMemory(VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT,
+                                 stagingBuffer, stagingMemory);
             void *data;
             vkMapMemory(device, stagingMemory, 0, metainfo.size, 0, &data);
             memcpy(data, asset->second.getData(), static_cast<size_t >(metainfo.size));
@@ -182,15 +200,16 @@ namespace Engine::RenderCore::Resource {
             createInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
             createInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
             createInfo.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT
-                    | VK_IMAGE_USAGE_SAMPLED_BIT;
+                               | VK_IMAGE_USAGE_SAMPLED_BIT;
             createInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
             createInfo.samples = VK_SAMPLE_COUNT_1_BIT;
             createInfo.flags = 0;
-            if(vkCreateImage(device,&createInfo, nullptr,&textureImage)!=VK_SUCCESS){
+            if (vkCreateImage(device, &createInfo, nullptr, &textureImage) != VK_SUCCESS) {
                 throw std::runtime_error("failed to create image");
             }
-
+            allocateImageMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 
         }
     }
+
 }

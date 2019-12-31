@@ -24,7 +24,7 @@ Engine::Game::Game(Scene &scene) {
     //loading assets
     RenderCore::assetManager.loadAssets();
     //create buffer
-    RenderCore::Resource::BufferManager::init(scene);
+    RenderCore::BufferManager::init(scene);
     RenderCore::DescriptorHelper::createDescriptorSets();
     //record commands and begin
     RenderCore::CommandHelper::recordCommandBuffers(
