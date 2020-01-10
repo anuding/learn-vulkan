@@ -26,7 +26,7 @@ namespace Engine::RenderCore::Resource {
         imageAsset.setData(pixels);
         imageAsset.setMetaInfo(metaInfo);
         assetMap.insert(std::make_pair<std::string, Asset>("demo", static_cast<Asset &&>(imageAsset)));
-        stbi_image_free(pixels);
+        //stbi_image_free(pixels);
     }
 
     const std::unordered_map<std::string, Asset> &AssetManager::getAssetMap() const {

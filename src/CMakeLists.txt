@@ -49,7 +49,6 @@ ENDIF ()
 IF (WIN32)
     MESSAGE(STATUS "current platform: WIN32 ")
 
-    #file(COPY ../assets/spv_shaders DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
     INCLUDE_DIRECTORIES(D:\\CG_SDKS\\glfw-3.3.bin.WIN64\\include)
     LINK_DIRECTORIES(D:\\CG_SDKS\\glfw-3.3.bin.WIN64\\lib-vc2017)

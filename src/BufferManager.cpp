@@ -6,7 +6,7 @@
 #include "BufferManager.h"
 #include "VKContext.h"
 #include "Shader.h"
-
+#include "stb/stb_image.h"
 namespace Engine::RenderCore::BufferManager {
     uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
         VkPhysicalDeviceMemoryProperties memoryProperties;
@@ -208,7 +208,7 @@ namespace Engine::RenderCore::BufferManager {
                 throw std::runtime_error("failed to create image");
             }
             allocateImageMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
-
+            stbi_image_free((stbi_uc*)asset->second.getData());
         }
     }
 
