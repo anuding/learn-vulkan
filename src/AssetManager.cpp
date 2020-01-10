@@ -9,6 +9,7 @@
 #include "stb/stb_image.h"
 
 #include "VKContext.h"
+#include <stdexcept>
 
 namespace Engine::RenderCore::Resource {
 

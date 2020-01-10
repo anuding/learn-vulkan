@@ -10,9 +10,6 @@ namespace Engine::RenderCore::ShaderHelper {
 
     std::vector<char> readFile(const std::string &filename) {
         std::string path = filename;
-        #ifdef _WIN32
-            path="build/bin/"+filename;
-        #endif
         std::ifstream file(path, std::ios::ate | std::ios::binary);
         if (!file.is_open()) {
             throw std::runtime_error("failed to open file");
