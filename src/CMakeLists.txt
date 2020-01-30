@@ -2,7 +2,6 @@ include_directories(3rd)
 
 IF (UNIX)
     MESSAGE(STATUS "Current platform: UNIX ")
-    file(COPY ../assets DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
     ADD_LIBRARY(ENGINE_CORE #SHARED
             Application.cpp
@@ -49,14 +48,15 @@ ENDIF ()
 IF (WIN32)
     MESSAGE(STATUS "current platform: WIN32 ")
 
+    SET(CG_SDK "C:\\Users\\ANUDING\\FD_Software\\CG_SDKS")
 
-    INCLUDE_DIRECTORIES(D:\\CG_SDKS\\glfw-3.3.bin.WIN64\\include)
-    LINK_DIRECTORIES(D:\\CG_SDKS\\glfw-3.3.bin.WIN64\\lib-vc2017)
+    INCLUDE_DIRECTORIES(${CG_SDK}\\glfw-3.3.bin.WIN64\\include)
+    LINK_DIRECTORIES(${CG_SDK}\\glfw-3.3.bin.WIN64\\lib-vc2019)
 
-    INCLUDE_DIRECTORIES(D:\\CG_SDKS\\VulkanSDK\\1.1.121.2\\Include)
-    LINK_DIRECTORIES(D:\\CG_SDKS\\VulkanSDK\\1.1.121.2\\Lib)
+    INCLUDE_DIRECTORIES(${CG_SDK}\\VulkanSDK\\1.1.121.2\\Include)
+    LINK_DIRECTORIES(${CG_SDK}\\VulkanSDK\\1.1.121.2\\Lib)
 
-    INCLUDE_DIRECTORIES(D:\\CG_SDKS\\glm)
+    INCLUDE_DIRECTORIES(${CG_SDK}\\glm)
 
     ADD_LIBRARY(ENGINE_CORE #SHARED
             Application.cpp
@@ -77,7 +77,6 @@ IF (WIN32)
             Mesh.cpp
             BufferManager.cpp
             VKContext.cpp VKContext.h Instance.cpp Instance.h Descriptor.cpp Descriptor.h AssetManager.cpp AssetManager.h Asset.cpp Asset.h Surface.cpp Surface.h Test.cpp Test.h)
-
 
     ADD_EXECUTABLE(engine main.cpp)
     TARGET_LINK_LIBRARIES(engine ENGINE_CORE)

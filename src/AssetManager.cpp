@@ -17,7 +17,7 @@ namespace Engine::RenderCore::Resource {
         Asset imageAsset;
         AssetMetaInfo metaInfo;
 
-        stbi_uc *pixels = stbi_load("assets/textures/logo500px.png", &metaInfo.width, &metaInfo.height,
+        stbi_uc *pixels = stbi_load("assets/textures/logo400px.png", &metaInfo.width, &metaInfo.height,
                                     &metaInfo.channels,
                                     STBI_rgb_alpha);
         if (!pixels)
