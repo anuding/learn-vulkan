@@ -366,4 +366,5 @@ cmake-build-sharedlibrarydebug/
 *.spv
 *.jpg
 *.png
+assets
 /assets.zip
