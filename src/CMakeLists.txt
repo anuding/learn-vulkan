@@ -76,7 +76,8 @@ IF (WIN32)
             GameObject.cpp
             Mesh.cpp
             BufferManager.cpp
-            VKContext.cpp VKContext.h Instance.cpp Instance.h Descriptor.cpp Descriptor.h AssetManager.cpp AssetManager.h Asset.cpp Asset.h Surface.cpp Surface.h Test.cpp Test.h)
+            VKContext.cpp VKContext.h Instance.cpp Instance.h Descriptor.cpp Descriptor.h AssetManager.cpp AssetManager.h Asset.cpp Asset.h Surface.cpp Surface.h Test.cpp Test.h
+            Buffer.cpp Buffer.h)
 
     ADD_EXECUTABLE(engine main.cpp)
     TARGET_LINK_LIBRARIES(engine ENGINE_CORE)

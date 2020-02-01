@@ -22,10 +22,10 @@ namespace Engine::RenderCore::BufferManager {
 
     void createTextureBuffer();
 
-    void createVertexBuffer(const std::vector<Vertex> &resources, RESOURCE_TYPE resourceType, VkBuffer &buffer,
+    void createVertexBuffer(const std::vector<Vertex> &resources, VkBuffer &buffer,
                             VkDeviceMemory &bufferMemory);
 
-    void createIndexBuffer(const std::vector<uint16_t> &resources, RESOURCE_TYPE resourceType, VkBuffer &buffer,
+    void createIndexBuffer(const std::vector<uint16_t> &resources, VkBuffer &buffer,
                            VkDeviceMemory &bufferMemory);
 
     void createUniformBuffer();
