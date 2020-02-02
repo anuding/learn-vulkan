@@ -7,6 +7,8 @@
 #include "VKContext.h"
 #include "Shader.h"
 #include "stb/stb_image.h"
+#include "Command.h"
+
 namespace Engine::RenderCore::BufferManager {
 	uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags) {
 		VkPhysicalDeviceMemoryProperties memoryProperties;
@@ -64,33 +66,36 @@ namespace Engine::RenderCore::BufferManager {
 	}
 
 	void copyBuffer(VkBuffer srcBuffer, VkBuffer& dstBuffer, VkDeviceSize size) {
-		VkCommandBufferAllocateInfo allocateInfo = {};
-		allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocateInfo.commandPool = commandPool;
-		allocateInfo.commandBufferCount = 1;
-
-		VkCommandBuffer commandBuffer;
-		vkAllocateCommandBuffers(device, &allocateInfo, &commandBuffer);
-		VkCommandBufferBeginInfo beginInfo = {};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-		beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		vkBeginCommandBuffer(commandBuffer, &beginInfo);
+		VkCommandBuffer commandBuffer = RenderCore::CommandHelper::beginSingleTimeCommands();
 
 		VkBufferCopy bufferCopy = {};
-		bufferCopy.srcOffset = 0;
-		bufferCopy.dstOffset = 0;
 		bufferCopy.size = size;
 		vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &bufferCopy);
-		vkEndCommandBuffer(commandBuffer);
 
-		VkSubmitInfo submitInfo = {};
-		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandBuffer;
-		vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-		vkQueueWaitIdle(graphicsQueue);
-		vkFreeCommandBuffers(device, commandPool, 1, &commandBuffer);
+		CommandHelper::endSingleCommandBuffer(commandBuffer);
+	}
+
+	void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
+	{
+		VkCommandBuffer commandBuffer = CommandHelper::beginSingleTimeCommands();
+
+		VkImageMemoryBarrier barrier = {};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = oldLayout;
+		barrier.newLayout = newLayout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = image;
+		barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
+		barrier.srcAccessMask = 0;
+		barrier.dstAccessMask = 0;
+		vkCmdPipelineBarrier(commandBuffer, 0, 0, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+
+		CommandHelper::endSingleCommandBuffer(commandBuffer);
 	}
 
 	void createUniformBuffer() {

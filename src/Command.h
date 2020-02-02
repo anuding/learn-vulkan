@@ -15,4 +15,6 @@ namespace Engine::RenderCore::CommandHelper {
     void recordCommandBuffers(uint32_t vertexArrayLength, uint16_t indexArrayLength, Scene &scene);
 
     VkCommandBuffer beginSingleTimeCommands();
+
+    void endSingleCommandBuffer(VkCommandBuffer commandBuffer);
 }
