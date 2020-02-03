@@ -98,6 +98,27 @@ namespace Engine::RenderCore::BufferManager {
 		CommandHelper::endSingleCommandBuffer(commandBuffer);
 	}
 
+	void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
+	{
+		VkCommandBuffer commandBuffer = CommandHelper::beginSingleTimeCommands();
+
+		VkBufferImageCopy bufferImageCopy = {};
+		bufferImageCopy.bufferOffset = 0;
+		bufferImageCopy.bufferRowLength = 0;
+		bufferImageCopy.bufferImageHeight = 0;
+
+		bufferImageCopy.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		bufferImageCopy.imageSubresource.baseArrayLayer = 0;
+		bufferImageCopy.imageSubresource.layerCount = 1;
+		bufferImageCopy.imageSubresource.mipLevel = 0;
+
+		bufferImageCopy.imageOffset = { 0,0,0 };
+		bufferImageCopy.imageExtent = { width,height,1 };
+		vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferImageCopy);
+
+		CommandHelper::endSingleCommandBuffer(commandBuffer);
+	}
+
 	void createUniformBuffer() {
 		VkDeviceSize bufferSize = sizeof(ShaderHelper::UniformBufferObject);
 		uniformBuffers.resize(swapChainImages.size());
@@ -200,6 +221,11 @@ namespace Engine::RenderCore::BufferManager {
 			}
 			allocateImageMemory(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, textureImage, textureImageMemory);
 			stbi_image_free((stbi_uc*)asset->second.getData());
+
+			transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(metainfo.width), static_cast<uint32_t>(metainfo.height));
+			transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_UNORM, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
 		}
 	}
 
