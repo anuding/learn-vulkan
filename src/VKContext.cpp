@@ -44,6 +44,7 @@ namespace Engine::RenderCore {
     VkImage textureImage;
     VkDeviceMemory textureImageMemory;
     VkImageView textureImageView;
+    VkSampler textureSampler;
 
     const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
     const uint32_t WIDTH = 800;

@@ -59,6 +59,7 @@ namespace Engine::RenderCore::DeviceHelper {
         }
 
         VkPhysicalDeviceFeatures vkPhysicalDeviceFeatures = {};
+        vkPhysicalDeviceFeatures.samplerAnisotropy = VK_TRUE;
         VkDeviceCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         createInfo.queueCreateInfoCount = static_cast<uint32_t >(queueCreateInfos.size());

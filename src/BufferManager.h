@@ -24,6 +24,8 @@ namespace Engine::RenderCore::BufferManager {
 
     void createTextureView();
 
+    void createTextureSampler();
+
     void createVertexBuffer(const std::vector<Vertex> &resources, VkBuffer &buffer,
                             VkDeviceMemory &bufferMemory);
 

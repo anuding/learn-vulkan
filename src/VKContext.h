@@ -63,6 +63,7 @@ namespace Engine::RenderCore {
 	extern VkImage textureImage;
 	extern VkDeviceMemory textureImageMemory;
 	extern VkImageView textureImageView;
+	extern VkSampler textureSampler;
 
 	extern const uint32_t MAX_FRAMES_IN_FLIGHT;
 	extern const uint32_t WIDTH;
