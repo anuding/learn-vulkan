@@ -34,7 +34,7 @@ namespace Engine::RenderCore::CommandHelper {
 			renderPassBeginInfo.framebuffer = swapChainFrameBuffers[i];
 			renderPassBeginInfo.renderArea.offset = { 0, 0 };
 			renderPassBeginInfo.renderArea.extent = swapChainExtent;
-			VkClearValue clearValue = { 0.0f, 0.0f, 0.0f, 1.0f };
+			VkClearValue clearValue = { 0.2f, 0.2f, 0.2f, 1.0f };
 			renderPassBeginInfo.pClearValues = &clearValue;
 
 
