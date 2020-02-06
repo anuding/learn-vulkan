@@ -8,6 +8,6 @@
 
 namespace Engine::RenderCore::FrameBufferHelper {
 
-    void createFrameBuffers(std::vector<VkFramebuffer> &swapChainFrameBuffers,
-                            std::vector<VkImageView> &swapChainViews);
+    void init();
+    void createFrameBuffers();
 }

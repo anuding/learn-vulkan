@@ -364,3 +364,7 @@ cmake-build-relwithdebinfo/
 cmake-build-sharedlibrarydebug/
 # spir-v shaders
 *.spv
+*.jpg
+*.png
+assets
+/assets.zip

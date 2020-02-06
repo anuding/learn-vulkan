@@ -8,56 +8,52 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 #include "Vertex.h"
+#include "Scene.h"
 #include "VKContext.h"
 
-namespace Engine::RenderCore::Resource {
-
+namespace Engine::RenderCore::BufferManager {
     enum RESOURCE_TYPE {
         VERTEX,
-        INDEX
+        INDEX,
+        UNIFORM
     };
 
-    class BufferManager {
+    void init(Scene &scene);
 
-    public:
-        template<class T>
-        void createBuffer(const std::vector<T> &resources, RESOURCE_TYPE resourceType, VkBuffer &buffer,
-                          VkDeviceMemory &bufferMemory) {
-            VkDeviceSize bufferSize = sizeof(resources[0]) * resources.size();
-            VkBuffer stagingBuffer;
-            VkDeviceMemory stagingBufferMemory;
-            allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-                           VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
-                           VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer,
-                           stagingBufferMemory);
-            void *data;
-            vkMapMemory(device, stagingBufferMemory, 0, bufferSize, 0, &data);
-            memcpy(data, resources.data(), (size_t) bufferSize);
-            vkUnmapMemory(device, stagingBufferMemory);
+    void createTextureBuffer();
 
-            VkBufferUsageFlags bufferUsageFlag;
-            if (resourceType == VERTEX)
-                bufferUsageFlag = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
-            if (resourceType == INDEX)
-                bufferUsageFlag = VK_BUFFER_USAGE_INDEX_BUFFER_BIT;
+    void createTextureView();
 
-            allocateBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT |
-                                       bufferUsageFlag,
-                           VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, buffer,
-                           bufferMemory);
-            copyBuffer(stagingBuffer, buffer, bufferSize);
-            vkDestroyBuffer(device, stagingBuffer, nullptr);
-            vkFreeMemory(device, stagingBufferMemory, nullptr);
-        }
+    void createTextureSampler();
 
-    private:
-        void allocateBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkMemoryPropertyFlags propertyFlags,
-                            VkBuffer &buffer, VkDeviceMemory &deviceMemory);
+    void createVertexBuffer(const std::vector<Vertex> &resources, VkBuffer &buffer,
+                            VkDeviceMemory &bufferMemory);
 
-        uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+    void createIndexBuffer(const std::vector<uint16_t> &resources, VkBuffer &buffer,
+                           VkDeviceMemory &bufferMemory);
 
-        void copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size);
-    };
+    void createUniformBuffer();
+
+    void createBuffer(VkDeviceSize deviceSize, VkBufferUsageFlags usageFlags, VkBuffer &buffer);
+
+    void allocateBufferMemory(VkMemoryPropertyFlags propertyFlags, VkBuffer &buffer,
+                              VkDeviceMemory &deviceMemory);
+
+    void allocateImageMemory(VkMemoryPropertyFlags propertyFlags, VkImage &image,
+                             VkDeviceMemory &deviceMemory);
+
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags propertyFlags);
+
+    template<class T>
+    void testFunc1(T b) {
+        auto a = Engine::RenderCore::device;
+    }
+
+    void copyBuffer(VkBuffer srcBuffer, VkBuffer &dstBuffer, VkDeviceSize size);
+
+    void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+
+    void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 }
 
 

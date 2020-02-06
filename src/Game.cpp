@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "Command.h"
 #include "VKContext.h"
+#include "Descriptor.h"
 
 void Engine::Game::update() {
     Application::update();
@@ -20,15 +21,16 @@ void Engine::Game::init() {
 
 Engine::Game::Game(Scene &scene) {
     scenes.push_back(scene);
-    bufferManager.createBuffer(scene.getGameObjects()[0].getMesh().getVertices(),
-                               RenderCore::Resource::RESOURCE_TYPE::VERTEX, RenderCore::vertexBuffer,
-                               RenderCore::vertexBufferMemory);
-    bufferManager.createBuffer(scene.getGameObjects()[0].getMesh().getIndices(),
-                               RenderCore::Resource::RESOURCE_TYPE::INDEX, RenderCore::indexBuffer,
-                               RenderCore::indexBufferMemory);
-    RenderCore::CommandHelper::createCommandBuffers(
+    //loading assets
+    RenderCore::assetManager.loadAssets();
+    //create buffer
+    RenderCore::BufferManager::init(scene);
+    RenderCore::DescriptorHelper::createDescriptorSets();
+    //record commands and begin
+    RenderCore::CommandHelper::recordCommandBuffers(
             static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getVertices().size()),
-            static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getIndices().size())
+            static_cast<uint32_t >(scene.getGameObjects()[0].getMesh().getIndices().size()),
+            scene
     );
 }
 

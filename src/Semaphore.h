@@ -1,14 +1,17 @@
 //
 // Created by anuding on 2019/12/21.
 //
+
+#ifndef ENGINE_SEMAPHORE_H
+#define ENGINE_SEMAPHORE_H
 #include <vector>
 #include <vulkan/vulkan.h>
+#include "VKContext.h"
 
-namespace Engine::RenderCore {
-    namespace SemaphoreHelper {
-        void createSyncObjects(std::vector<VkSemaphore> &imageAvailableSemaphores,
-                               std::vector<VkSemaphore> &renderFinishedSemaphores,
-                               std::vector<VkFence> &inFlightFences,
-                               size_t MAX_FRAMES_IN_FLIGHT);
-    }
+namespace Engine::RenderCore::SemaphoreHelper {
+
+    void init();
+
+    void createSyncObjects();
 }
+#endif

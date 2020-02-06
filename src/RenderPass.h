@@ -4,8 +4,10 @@
 
 #include <vulkan/vulkan.h>
 
-namespace Engine::RenderCore {
-    namespace RenderPassHelper {
-        void createRenderPass();
-    }
+namespace Engine::RenderCore::RenderPassHelper {
+
+    void init();
+
+    void createRenderPass();
+
 }

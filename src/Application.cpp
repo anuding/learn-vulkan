@@ -12,8 +12,10 @@
 #include "Queue.h"
 #include "Device.h"
 #include "Instance.h"
+#include "Descriptor.h"
 #include <thread>
 
+#define GLM_FORCE_RADIANS
 namespace Engine::RenderCore {
 
     Application::Application() {
@@ -21,18 +23,22 @@ namespace Engine::RenderCore {
         initVulkan();
     }
 
-    void Application::run() {
-
-        mainLoop();
-        cleanUp();
-    }
-
-
     void Application::initWindow() {
         glfwInit();
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_CLIENT_API, GLFW_FALSE);
         window = glfwCreateWindow(WIDTH, HEIGHT, "EngineTest", nullptr, nullptr);
+    }
+
+    void Application::run() {
+        mainLoop();
+        cleanUp();
+    }
+
+    void Application::createSurface() {
+        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create window surface!");
+        }
     }
 
     void Application::cleanUp() {
@@ -54,10 +60,26 @@ namespace Engine::RenderCore {
         }
 
         vkDestroySwapchainKHR(device, swapChain, nullptr);
+
+        vkDestroyImageView(device, textureImageView, nullptr);
+        vkDestroyImage(device, textureImage, nullptr);
+        vkFreeMemory(device, textureImageMemory, nullptr);
+        vkDestroySampler(device, textureSampler, nullptr);
+
         vkDestroyBuffer(device, vertexBuffer, nullptr);
         vkFreeMemory(device, vertexBufferMemory, nullptr);
+
         vkDestroyBuffer(device, indexBuffer, nullptr);
         vkFreeMemory(device, indexBufferMemory, nullptr);
+
+        vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
+
+        for (size_t i = 0; i < swapChainImages.size(); i++) {
+            vkDestroyBuffer(device, uniformBuffers[i], nullptr);
+            vkFreeMemory(device, uniformBufferMemories[i], nullptr);
+        }
+
+        vkDestroyDescriptorPool(device, descriptorPool, nullptr);
         //this is a red line
         vkDestroyDevice(device, nullptr);
         if (enableValidationLayers)
@@ -70,33 +92,27 @@ namespace Engine::RenderCore {
     }
 
     void Application::initVulkan() {
-        InstanceHelper::createInstance();
 
+        InstanceHelper::init();
         DebugUtils::setupDebugMessenger(enableValidationLayers);
 
         createSurface();
 
-        DeviceHelper::pickPhysicalDevice();
+        DeviceHelper::init();
 
-        DeviceHelper::createLogicalDevice();
+        SwapChainHelper::init();
 
-        SwapChainHelper::createSwapChain(WIDTH, HEIGHT);
+        RenderPassHelper::init();
 
-        SwapChainHelper::createImageViews();
+        FrameBufferHelper::init();
 
-        RenderPassHelper::createRenderPass();
+        DescriptorHelper::init();
 
-        PipelineHelper::createGraphicsPipelines();
+        CommandHelper::init();
 
-        FrameBufferHelper::createFrameBuffers(swapChainFrameBuffers, swapChainImageViews);
+        SemaphoreHelper::init();
 
-        CommandHelper::createCommandPool();
-
-
-        SemaphoreHelper::createSyncObjects(imageAvailableSemaphores, renderFinishedSemaphores,
-                                           inFlightFences, MAX_FRAMES_IN_FLIGHT);
-
-
+        PipelineHelper::init();
     }
 
     void Application::mainLoop() {
@@ -118,12 +134,6 @@ namespace Engine::RenderCore {
     }
 
 
-
-    void Application::createSurface() {
-        if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
-            throw std::runtime_error("failed to create window surface!");
-        }
-    }
     void Application::drawFrame() {
         vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, std::numeric_limits<uint64_t>::max());
         vkResetFences(device, 1, &inFlightFences[currentFrame]);
@@ -131,7 +141,7 @@ namespace Engine::RenderCore {
         vkAcquireNextImageKHR(device, swapChain, std::numeric_limits<uint64_t>::max(),
                               imageAvailableSemaphores[currentFrame],
                               VK_NULL_HANDLE, &imageIndex);
-
+        updateUniformBuffer(imageIndex);
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
         VkSemaphore waitSemaphores[] = {imageAvailableSemaphores[currentFrame]};
@@ -163,6 +173,30 @@ namespace Engine::RenderCore {
     }
 
     void Application::update() {
+
+    }
+
+    void Application::updateUniformBuffer(uint32_t index) {
+        static float degree = 0.0f;
+        if (degree > 360)
+            degree = 0.0f;
+        ShaderHelper::UniformBufferObject ubo = {};
+        ubo.model = glm::rotate(glm::mat4(1.0f),
+                                glm::radians(degree),
+                                glm::vec3(0.0f, 0.0f, 1.0f));
+        degree += 0.5f;
+        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
+                               glm::vec3(0.0f, 0.0f, 0.0f),
+                               glm::vec3(0.0f, 0.0f, 1.0f));
+        ubo.proj = glm::perspective(glm::radians(90.0f),
+                                    swapChainExtent.width / (float) swapChainExtent.height, 0.1f,
+                                    10.0f);
+        ubo.proj[1][1] *= -1;
+
+        void *data;
+        vkMapMemory(device, uniformBufferMemories[index], 0, sizeof(ubo), 0, &data);
+        memcpy(data, &ubo, sizeof(ubo));
+        vkUnmapMemory(device, uniformBufferMemories[index]);
 
     }
 }

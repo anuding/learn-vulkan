@@ -9,7 +9,7 @@
 #include "Queue.h"
 #include "SwapChain.h"
 
-namespace Engine::RenderCore::DeviceHelper{
+namespace Engine::RenderCore::DeviceHelper {
 
     void pickPhysicalDevice() {
         VkPhysicalDevice vkPhysicalDevice = VK_NULL_HANDLE;
@@ -59,6 +59,7 @@ namespace Engine::RenderCore::DeviceHelper{
         }
 
         VkPhysicalDeviceFeatures vkPhysicalDeviceFeatures = {};
+        vkPhysicalDeviceFeatures.samplerAnisotropy = VK_TRUE;
         VkDeviceCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
         createInfo.queueCreateInfoCount = static_cast<uint32_t >(queueCreateInfos.size());
@@ -81,7 +82,6 @@ namespace Engine::RenderCore::DeviceHelper{
     }
 
 
-
     bool checkPhysicalDeviceExtensionSupport(VkPhysicalDevice physicalDevice) {
         uint32_t extensionCount;
         vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
@@ -94,5 +94,11 @@ namespace Engine::RenderCore::DeviceHelper{
             requiredExtensions.erase(extension.extensionName);
         }
         return requiredExtensions.empty();
+    }
+
+    void init() {
+        pickPhysicalDevice();
+
+        createLogicalDevice();
     }
 }

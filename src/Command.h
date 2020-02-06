@@ -3,9 +3,18 @@
 //
 #include <vulkan/vulkan.h>
 #include <vector>
+#include "Scene.h"
 
 namespace Engine::RenderCore::CommandHelper {
+    void init();
+
     void createCommandPool();
 
-    void createCommandBuffers(uint32_t vertexArrayLength, uint16_t indexArrayLength);
+    void allocateCommandBuffers();
+
+    void recordCommandBuffers(uint32_t vertexArrayLength, uint16_t indexArrayLength, Scene &scene);
+
+    VkCommandBuffer beginSingleTimeCommands();
+
+    void endSingleCommandBuffer(VkCommandBuffer commandBuffer);
 }
