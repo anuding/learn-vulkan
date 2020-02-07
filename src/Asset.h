@@ -14,8 +14,11 @@ struct AssetMetaInfo{
     int size;
 };
 
+typedef size_t Key;
+
 class Asset {
 private:
+    Key id;
     unsigned char* data;
     AssetMetaInfo metaInfo;
 public:

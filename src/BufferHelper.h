@@ -2,8 +2,8 @@
 // Created by anuding on 2019/12/24.
 //
 
-#ifndef ENGINE_BUFFERMANAGER_H
-#define ENGINE_BUFFERMANAGER_H
+#ifndef ENGINE_BufferHelper_H
+#define ENGINE_BufferHelper_H
 
 #include <vector>
 #include <vulkan/vulkan.h>
@@ -11,7 +11,7 @@
 #include "Scene.h"
 #include "VKContext.h"
 
-namespace Engine::RenderCore::BufferManager {
+namespace Engine::RenderCore::BufferHelper {
     enum RESOURCE_TYPE {
         VERTEX,
         INDEX,
@@ -19,12 +19,6 @@ namespace Engine::RenderCore::BufferManager {
     };
 
     void init(Scene &scene);
-
-    void createTextureBuffer();
-
-    void createTextureView();
-
-    void createTextureSampler();
 
     void createVertexBuffer(const std::vector<Vertex> &resources, VkBuffer &buffer,
                             VkDeviceMemory &bufferMemory);
@@ -57,4 +51,4 @@ namespace Engine::RenderCore::BufferManager {
 }
 
 
-#endif //ENGINE_BUFFERMANAGER_H
+#endif //ENGINE_BufferHelper_H

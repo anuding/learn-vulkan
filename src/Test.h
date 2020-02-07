@@ -8,7 +8,7 @@
 
 #include "VKContext.h"
 
-namespace Engine::RenderCore::Resource::BufferManager {
+namespace Engine::RenderCore::Resource::BufferHelper {
     void happy();
 
 

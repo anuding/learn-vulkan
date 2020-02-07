@@ -20,7 +20,7 @@ IF (UNIX)
             Game.cpp
             GameObject.cpp
             Mesh.cpp
-            BufferManager.cpp
+            BufferHelper.cpp
             Instance.cpp
             Descriptor.cpp
             AssetManager.cpp
@@ -37,11 +37,6 @@ IF (UNIX)
     TARGET_INCLUDE_DIRECTORIES(engine PRIVATE Vulkan::Vulkan)
     TARGET_LINK_LIBRARIES(engine glfw)
     TARGET_LINK_LIBRARIES(engine Vulkan::Vulkan)
-
-    #    TARGET_COMPILE_DEFINITIONS(ENGINE_CORE PRIVATE VK_USE_PLATFORM_XCB_KHR)
-    #    TARGET_INCLUDE_DIRECTORIES(ENGINE_CORE PRIVATE Vulkan::Vulkan)
-    #    TARGET_LINK_LIBRARIES(ENGINE_CORE glfw)
-    #    TARGET_LINK_LIBRARIES(ENGINE_CORE Vulkan::Vulkan)
 ENDIF ()
 
 
@@ -75,9 +70,17 @@ IF (WIN32)
             Game.cpp
             GameObject.cpp
             Mesh.cpp
-            BufferManager.cpp
-            VKContext.cpp VKContext.h Instance.cpp Instance.h Descriptor.cpp Descriptor.h AssetManager.cpp AssetManager.h Asset.cpp Asset.h Surface.cpp Surface.h Test.cpp Test.h
-            Buffer.cpp Buffer.h)
+            BufferHelper.cpp
+            VKContext.cpp VKContext.h 
+            Instance.cpp Instance.h 
+            Descriptor.cpp Descriptor.h 
+            AssetManager.cpp AssetManager.h 
+            Asset.cpp Asset.h 
+            Surface.cpp Surface.h 
+            Test.cpp Test.h
+            Buffer.cpp Buffer.h
+            Texture.cpp Texture.h
+            Sampler.cpp Sampler.h)
 
     ADD_EXECUTABLE(engine main.cpp)
     TARGET_LINK_LIBRARIES(engine ENGINE_CORE)

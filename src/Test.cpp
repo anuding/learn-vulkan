@@ -5,7 +5,7 @@
 
 #include "Test.h"
 
-namespace Engine::RenderCore::Resource::BufferManager {
+namespace Engine::RenderCore::Resource::BufferHelper {
     void happy() {
         auto b = device;
     }

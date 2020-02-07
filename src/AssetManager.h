@@ -10,12 +10,14 @@
 namespace Engine::RenderCore::Resource {
     class AssetManager {
     public:
-        void loadAssets();
+        void batchLoadFromFile(const char* path);
+        Key load(const char* path);
+        const std::unordered_map<Key, Asset>& getAssetMap() const;
+        const Asset& getAssetByKey(Key key) const;
     private:
-
-        std::unordered_map<std::string, Asset> assetMap;
+        std::unordered_map<Key, Asset> assetMap;
     public:
-        const std::unordered_map<std::string, Asset> &getAssetMap() const;
+       
     };
 }
 #endif //ENGINE_ASSETMANAGER_H
