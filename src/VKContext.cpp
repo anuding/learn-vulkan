@@ -41,8 +41,6 @@ namespace Engine::RenderCore {
     GLFWwindow *window;
     VkInstance instance;
 
-    VkImage textureImage;
-    VkDeviceMemory textureImageMemory;
     VkImageView textureImageView;
     VkSampler textureSampler;
 

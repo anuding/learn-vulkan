@@ -19,7 +19,8 @@ namespace Engine::RenderCore {
 	const bool enableValidationLayers = true;
 #endif
 	const std::vector<const char*> validationLayers = {
-			"VK_LAYER_KHRONOS_validation"
+			//"VK_LAYER_KHRONOS_validation"
+		"VK_LAYER_LUNARG_standard_validation"
 	};
 	const std::vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
@@ -60,8 +61,6 @@ namespace Engine::RenderCore {
 	extern GLFWwindow* window;
 	extern VkInstance instance;
 
-	extern VkImage textureImage;
-	extern VkDeviceMemory textureImageMemory;
 	extern VkImageView textureImageView;
 	extern VkSampler textureSampler;
 

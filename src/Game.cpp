@@ -8,10 +8,15 @@
 #include "Descriptor.h"
 #include "Texture.h"
 #include "Sampler.h"
+#include "Mesh.h"
 void Engine::Game::update() {
 	Application::update();
 }
+Engine::Game::~Game()
+{
+	//destroy gameObjs
 
+}
 Engine::Game::Game() {
 	init();
 }
@@ -25,28 +30,25 @@ Engine::Game::Game(Scene& scene) {
 	//loading assets
 	RenderCore::assetManager.load("assets/textures/logo400px.png");
 
-	//create buffer
-	RenderCore::BufferHelper::init(scene);
+	//create vertex buffer and index buffer
+	RenderCore::BufferHelper::createVertexBuffer(scene.getGameObjects()[0].getComponent<Mesh>()->vertices,
+		RenderCore::vertexBuffer, RenderCore::vertexBufferMemory);
+	RenderCore::BufferHelper::createIndexBuffer(scene.getGameObjects()[0].getComponent<Mesh>()->indices,
+		RenderCore::indexBuffer, RenderCore::indexBufferMemory);
+	RenderCore::BufferHelper::createUniformBuffer();
 
 	//create textures
 	Texture* texture = new Texture("assets/textures/logo400px.png");
-	RenderCore::textureImage = texture->image;
-	RenderCore::textureImageMemory = texture->memory;
 	RenderCore::textureImageView = texture->imageView;
 
 	//create samplers
 	RenderCore::textureSampler = Sampler(RenderCore::device).get();
 	
-	RenderCore::DescriptorHelper::createDescriptorSets();
-
-
+	//update descriptorsSets
+	RenderCore::DescriptorHelper::updateDescriptorSets();
 
 	//record commands and begin
-	RenderCore::CommandHelper::recordCommandBuffers(
-		static_cast<uint32_t>(scene.getGameObjects()[0].getMesh().getVertices().size()),
-		static_cast<uint32_t>(scene.getGameObjects()[0].getMesh().getIndices().size()),
-		scene
-	);
+	RenderCore::CommandHelper::recordCommandBuffers(scene);
 }
 
 const std::vector<Scene>& Engine::Game::getScenes() const {

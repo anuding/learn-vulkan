@@ -1,6 +1,19 @@
 #include "Game.h"
 #include <stdexcept>
 #include <iostream>
+#include "Mesh.h"
+#include "Component.h"
+#include <memory>
+
+class parent
+{
+};
+
+class child : public parent
+{
+	std::vector<uint16_t > indices;
+
+};
 
 int main() {
 	std::vector<Vertex> vertices = { {{-0.5f, -0.5f, 0.0f},
@@ -23,12 +36,15 @@ int main() {
 	};
 	const std::vector<uint16_t> indices = { 0, 1, 2, 2, 3, 0,
 											4,5,6,6,7,4 };
-	Mesh mesh;
-	mesh.setVertices(vertices);
-	mesh.setIndices(indices);
+
+	std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+	mesh->vertices = vertices;
+	mesh->indices = indices;
+	std::shared_ptr<Componenet> c;
+	c = mesh;
 
 	GameObject gameObject;
-	gameObject.setMesh(mesh);
+	gameObject.components.push_back(c);
 	Scene scene;
 	scene.addGameObject(gameObject);
 

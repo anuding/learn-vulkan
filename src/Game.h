@@ -22,6 +22,7 @@ namespace Engine {
 
     public:
         Game();
+        ~Game();
         Game(Scene &scene);
 
         void init();

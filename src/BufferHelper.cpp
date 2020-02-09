@@ -196,10 +196,4 @@ namespace Engine::RenderCore::BufferHelper {
 		vkDestroyBuffer(RenderCore::device, stagingBuffer, nullptr);
 		vkFreeMemory(RenderCore::device, stagingBufferMemory, nullptr);
 	}
-
-	void init(Scene& scene) {
-		createVertexBuffer(scene.getGameObjects()[0].getMesh().getVertices(), vertexBuffer, vertexBufferMemory);
-		createIndexBuffer(scene.getGameObjects()[0].getMesh().getIndices(), indexBuffer, indexBufferMemory);
-		createUniformBuffer();
-	}
 }

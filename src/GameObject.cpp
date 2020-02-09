@@ -4,10 +4,10 @@
 
 #include "GameObject.h"
 
-const Mesh &GameObject::getMesh() const {
-    return mesh;
-}
-
-void GameObject::setMesh(const Mesh &mesh) {
-    GameObject::mesh = mesh;
-}
+//std::shared_ptr<Componenet> GameObject::getComponentByTag(std::string tag) const
+//{
+//	 for (auto &component : components) {
+//		 if (component->tag == tag)
+//			 return component;
+//	}
+//}

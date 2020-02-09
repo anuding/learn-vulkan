@@ -55,7 +55,7 @@ namespace Engine::RenderCore::DescriptorHelper {
 
 
 
-	void createDescriptorSets() {
+	void updateDescriptorSets() {
 		for (size_t i = 0; i < swapChainImages.size(); i++) {
 			VkDescriptorBufferInfo bufferInfo = {};
 			bufferInfo.buffer = uniformBuffers[i];

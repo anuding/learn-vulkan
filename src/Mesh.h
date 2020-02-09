@@ -7,23 +7,14 @@
 
 #include "Vertex.h"
 #include <vector>
-class Mesh {
-private:
-    std::vector<Vertex> vertices;
-    std::vector<uint16_t > indices;
+#include "Component.h"
+
+class Mesh : public Componenet {
 public:
-    const std::vector<uint16_t> &getIndices() const;
-
-    void setIndices(const std::vector<uint16_t> &indices);
-
-public:
-    const std::vector<Vertex> &getVertices() const;
-
-    void setVertices(const std::vector<Vertex> &vertices);
-
-public:
-
-    void init();
+	std::vector<Vertex> vertices;
+	std::vector<uint16_t > indices;
+	Mesh();
+	~Mesh();
 };
 
 

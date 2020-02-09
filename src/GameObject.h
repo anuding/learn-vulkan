@@ -5,15 +5,23 @@
 #ifndef ENGINE_GAMEOBJECT_H
 #define ENGINE_GAMEOBJECT_H
 
-#include "Mesh.h"
+#include "Component.h"
 #include <vector>
+#include <memory>
+
 class GameObject {
 public:
-    Mesh mesh;
+	std::vector<std::shared_ptr<Componenet>> components;
 
-    const Mesh &getMesh() const;
-
-    void setMesh(const Mesh &mesh);
+	template<typename T>
+	std::shared_ptr<T> getComponent() const
+	{
+		for (auto& component : components) {
+			std::shared_ptr<T> actualComp = std::dynamic_pointer_cast<T>(component);
+			if (actualComp != nullptr)
+				return actualComp;
+		}
+	};
 };
 
 

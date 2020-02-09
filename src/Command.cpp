@@ -6,6 +6,7 @@
 #include "Command.h"
 #include "Queue.h"
 #include "VKContext.h"
+#include "Mesh.h"
 
 namespace Engine::RenderCore::CommandHelper {
 	void createCommandPool() {
@@ -20,7 +21,7 @@ namespace Engine::RenderCore::CommandHelper {
 		}
 	}
 
-	void recordCommandBuffers(uint32_t vertexArrayLength, uint16_t indexArrayLength, Scene& scene) {
+	void recordCommandBuffers(Scene& scene) {
 		for (size_t i = 0; i < commandBuffers.size(); i++) {
 			VkCommandBufferBeginInfo beginInfo = {};
 			beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -55,7 +56,7 @@ namespace Engine::RenderCore::CommandHelper {
 					pipelineLayout, 0, 1,
 					&descriptorSets[i], 0,
 					nullptr);
-				vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(indexArrayLength), 1,
+				vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(gameObj.getComponent<Mesh>()->indices.size()), 1,
 					0, 0, 0);
 			}
 			vkCmdEndRenderPass(commandBuffers[i]);

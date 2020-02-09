@@ -12,14 +12,6 @@
 #include "VKContext.h"
 
 namespace Engine::RenderCore::BufferHelper {
-    enum RESOURCE_TYPE {
-        VERTEX,
-        INDEX,
-        UNIFORM
-    };
-
-    void init(Scene &scene);
-
     void createVertexBuffer(const std::vector<Vertex> &resources, VkBuffer &buffer,
                             VkDeviceMemory &bufferMemory);
 

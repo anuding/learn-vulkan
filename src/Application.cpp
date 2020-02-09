@@ -62,8 +62,6 @@ namespace Engine::RenderCore {
         vkDestroySwapchainKHR(device, swapChain, nullptr);
 
         vkDestroyImageView(device, textureImageView, nullptr);
-        vkDestroyImage(device, textureImage, nullptr);
-        vkFreeMemory(device, textureImageMemory, nullptr);
         vkDestroySampler(device, textureSampler, nullptr);
 
         vkDestroyBuffer(device, vertexBuffer, nullptr);

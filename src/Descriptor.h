@@ -15,7 +15,7 @@ namespace Engine::RenderCore::DescriptorHelper{
 
     void allocateDescriptorSets();
 
-    void createDescriptorSets();
+    void updateDescriptorSets();
 }
 
 #endif //LEARN_VULKAN_DESCRIPTOR_H

@@ -69,7 +69,6 @@ IF (WIN32)
             Scene.cpp
             Game.cpp
             GameObject.cpp
-            Mesh.cpp
             BufferHelper.cpp
             VKContext.cpp VKContext.h 
             Instance.cpp Instance.h 
@@ -80,7 +79,9 @@ IF (WIN32)
             Test.cpp Test.h
             Buffer.cpp Buffer.h
             Texture.cpp Texture.h
-            Sampler.cpp Sampler.h)
+            Sampler.cpp Sampler.h
+            Component.cpp Component.h
+            Mesh.cpp Mesh.h)
 
     ADD_EXECUTABLE(engine main.cpp)
     TARGET_LINK_LIBRARIES(engine ENGINE_CORE)
