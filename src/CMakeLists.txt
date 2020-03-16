@@ -4,8 +4,10 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /SUBSYSTEM:WINDOWS /ENTRY:
 file(COPY ../assets DESTINATION ${CMAKE_BINARY_DIR}/bin)
 
 PROJECT(LVEngine)
-ADD_SUBDIRECTORY(common bin)
+ADD_SUBDIRECTORY(common)
+ADD_SUBDIRECTORY(coreLayer)
 
 ADD_EXECUTABLE(LVEngine main.cpp)
 
 target_link_libraries(LVEngine LVECommon)
+target_link_libraries(LVEngine LVECore)
