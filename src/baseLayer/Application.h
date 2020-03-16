@@ -9,10 +9,8 @@
 namespace Engine::RenderCore {
     class Application {
 
-    private:
-//        const uint32_t WIDTH = 800;
-//        const uint32_t HEIGHT = 600;
-//        const uint32_t MAX_FRAMES_IN_FLIGHT = 2;
+    public:
+
 
     public:
         std::chrono::system_clock::time_point a = std::chrono::system_clock::now();
@@ -21,11 +19,11 @@ namespace Engine::RenderCore {
     public:
         Application();
 
-        void run();
-
         void initWindow();
 
         void initVulkan();
+
+        void run();
 
         void mainLoop();
 
@@ -35,8 +33,6 @@ namespace Engine::RenderCore {
 
         virtual void drawFrame();
 
-        virtual void update();
-
-        void updateUniformBuffer(uint32_t index);
+        virtual void update() = 0;
     };
 }

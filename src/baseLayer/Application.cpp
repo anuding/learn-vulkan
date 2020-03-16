@@ -173,28 +173,4 @@ namespace Engine::RenderCore {
     void Application::update() {
 
     }
-
-    void Application::updateUniformBuffer(uint32_t index) {
-        static float degree = 0.0f;
-        if (degree > 360)
-            degree = 0.0f;
-        ShaderHelper::UniformBufferObject ubo = {};
-        ubo.model = glm::rotate(glm::mat4(1.0f),
-                                glm::radians(degree),
-                                glm::vec3(0.0f, 0.0f, 1.0f));
-        degree += 0.5f;
-        ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f),
-                               glm::vec3(0.0f, 0.0f, 0.0f),
-                               glm::vec3(0.0f, 0.0f, 1.0f));
-        ubo.proj = glm::perspective(glm::radians(90.0f),
-                                    swapChainExtent.width / (float) swapChainExtent.height, 0.1f,
-                                    10.0f);
-        ubo.proj[1][1] *= -1;
-
-        void *data;
-        vkMapMemory(device, uniformBufferMemories[index], 0, sizeof(ubo), 0, &data);
-        memcpy(data, &ubo, sizeof(ubo));
-        vkUnmapMemory(device, uniformBufferMemories[index]);
-
-    }
 }
