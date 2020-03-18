@@ -2,5 +2,8 @@
 #include <stdio.h>
 
 void sayHi() {
-	printf("Hihihihihihihi\n");
+	if(glfwVulkanSupported())
+		printf("Hi vulkan!\n");
+	else
+		printf("where is vulkan?\n");
 }
