@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 void sayHi() {
+	glfwInit();
 	if(glfwVulkanSupported())
 		printf("Hi vulkan!\n");
 	else
