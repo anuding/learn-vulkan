@@ -1,21 +1,21 @@
 #include "Window.h"
+#include "Application.h"
 
 namespace Engine::RenderCore {
-	Window::Window(uint32_t width, uint32_t height, const char* windowName)
-		:WIDTH(width), HEIGHT(height), WINDOW_NAME(windowName)
+	void Window::init(Application* app)
 	{
+		this->app = app;
 		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_FALSE);
-		this->window = glfwCreateWindow(WIDTH, HEIGHT, WINDOW_NAME, nullptr, nullptr);
+		this->get() = glfwCreateWindow(this->app->WINDOW_WIDTH, this->app->WINDOW_HEIGHT, this->app->WINDOW_NAME, nullptr, nullptr);
 	}
+
 	Window::~Window()
 	{
-		glfwDestroyWindow(window);
+		if (this->app == nullptr)
+			return;
+		glfwDestroyWindow(this->app->window.get());
 		glfwTerminate();
-	}
-	GLFWwindow* Window::get()
-	{
-		return window;
 	}
 }
