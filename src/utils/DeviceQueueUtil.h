@@ -1,3 +1,4 @@
+#pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
 
@@ -34,7 +35,6 @@ namespace Engine::Utils {
 	};
 
 	extern const std::vector<const char*> physicalDeviceExtensions;
-	extern std::vector<QueueFamily> selectedQueueFamilies;
 	extern std::vector<QueueFamily> getQueueFamilies(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
 
 	extern QueueFamilyIndices findQueueFamilies(VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
