@@ -1,0 +1,16 @@
+if(WIN32)
+	add_library(LVECommon LVECommon.cpp)
+	
+	set(CG_SDK C:\\Users\\ANUDING\\FD_Software\\CG_SDKS)
+	set(GLFW_H ${CG_SDK}\\glfw-3.3.bin.WIN64\\include)
+	set(GLFW_LINK ${CG_SDK}\\glfw-3.3.bin.WIN64\\lib-vc2019\\glfw3.lib)
+	set(VULKAN_H ${CG_SDK}\\VulkanSDK\\1.1.121.2\\Include)
+	set(VULKAN_LINK ${CG_SDK}\\VulkanSDK\\1.1.121.2\\Lib\\vulkan-1.lib)
+	set(GLM_H ${CG_SDK}\\glm)
+	
+	target_include_directories(LVECommon PUBLIC ${GLFW_H})
+	target_link_libraries(LVECommon ${GLFW_LINK})
+	target_include_directories(LVECommon PUBLIC ${VULKAN_H})
+	target_link_libraries(LVECommon ${VULKAN_LINK})
+	target_include_directories(LVECommon PUBLIC ${GLM_H})
+endif()

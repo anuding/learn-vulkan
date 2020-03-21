@@ -362,6 +362,7 @@ cmake-build-minsizerel/
 cmake-build-release/
 cmake-build-relwithdebinfo/
 cmake-build-sharedlibrarydebug/
+out/
 # spir-v shaders
 *.spv
 *.jpg
