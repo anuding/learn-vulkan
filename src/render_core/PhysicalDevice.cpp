@@ -3,17 +3,13 @@
 #include <stdexcept>
 #include <vector>
 #include <set>
+#include "Application.h"
 namespace Engine::RenderCore {
-	PhysicalDevice::PhysicalDevice(VkInstance instance, VkSurfaceKHR surface)
+	void PhysicalDevice::init(Application* app)
 	{
-		surfaceCopy = surface;
-		pickPhysicalDevice(instance);
+		this->app = app;
+		pickPhysicalDevice(app->instance.get());
 	}
-
-	VkPhysicalDevice PhysicalDevice::get() {
-		return this->physicalDevice;
-	}
-
 
 	void PhysicalDevice::pickPhysicalDevice(VkInstance instance) {
 		uint32_t deviceCount = 0;
@@ -28,17 +24,16 @@ namespace Engine::RenderCore {
 			if (!isPhysicalDeviceSuitable(pdevice))
 				continue;
 			uint32_t rank = 0;
-			std::vector<Utils::QueueFamily> queueFamilies = Utils::getQueueFamilies(pdevice, surfaceCopy);
+			std::vector<Utils::QueueFamily> queueFamilies = Utils::getQueueFamilies(pdevice, app->surface.get());
 			for (auto& qf : queueFamilies) {
 				rank += qf.count;
 			}
 			if (topRank < rank) {
 				topRank = rank;
-				physicalDevice = pdevice;
-				Utils::selectedQueueFamilies = queueFamilies;
+				app->physicalDevice.get() = pdevice;
 			}
 		}
-		if (physicalDevice == VK_NULL_HANDLE)
+		if (app->physicalDevice.get() == VK_NULL_HANDLE)
 			throw std::runtime_error("These devices are not suitable!");
 	}
 
@@ -47,7 +42,7 @@ namespace Engine::RenderCore {
 
 		bool swapChainAdequate = false;
 		if (isExtensionsSupported) {
-			Utils::SwapChainSupportedDetails details = Utils::querySwapChainSupport(physicalDevice, surfaceCopy);
+			Utils::SwapChainSupportedDetails details = Utils::querySwapChainSupport(physicalDevice, app->surface.get());
 			swapChainAdequate = !details.formats.empty()
 				&& !details.presentModes.empty();
 		}
@@ -67,4 +62,5 @@ namespace Engine::RenderCore {
 		}
 		return requiredExtensions.empty();
 	}
+
 }

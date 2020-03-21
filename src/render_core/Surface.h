@@ -1,16 +1,16 @@
+#pragma once
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
+#include "VkComp.h"
 
 namespace Engine::RenderCore {
-	class Surface {
+	class Surface: public VkComp<VkSurfaceKHR> {
 	public:
-		Surface(VkInstance instance, GLFWwindow* window);
+		Surface() = default;
 		~Surface();
-		VkSurfaceKHR get();
+		void init(Application* app) override;
+
 	private:
-		VkSurfaceKHR surface;
-		VkInstance instanceCopy;
-		GLFWwindow* windowCopy;
 
 		void createSurface();
 	};

@@ -6,38 +6,40 @@
 #include <set>
 #include <vector>
 #include "Device.h"
-
+#include "Application.h"
 
 namespace Engine::RenderCore {
-	Device::Device(VkPhysicalDevice physicalDevice) {
-		createLogicalDevice(physicalDevice);
-	}
-
 	Device::~Device() {
-		vkDestroyDevice(device, nullptr);
+		vkDestroyDevice(this->get(), nullptr);
 	}
 
-	VkDevice Device::get()
+	void Device::init(Application* app)
 	{
-		return VkDevice();
+		this->app = app;
+		createLogicalDevice(app->physicalDevice.get());
 	}
 
 	void Device::createLogicalDevice(VkPhysicalDevice physicalDevice) {
-		uint32_t universalFamilyIndex = -1;
-		for (auto& f : Utils::selectedQueueFamilies) {
+		auto availableQueueFamilies = Utils::getQueueFamilies(physicalDevice, app->surface.get());
+		for (auto& f : availableQueueFamilies) {
 			if (f.hasAbility(Utils::GRAPHICS)
 				&& f.hasAbility(Utils::COMPUTE)
 				&& f.hasAbility(Utils::PRESENT)
 				&& f.hasAbility(Utils::TRANSFER)
 				&& f.hasAbility(Utils::SPARSE))
-				universalFamilyIndex = f.index;
+			{
+				universalQueueFamilyIndex = f.index;
+				break;
+			}
 		}
+		if(universalQueueFamilyIndex == -1)
+			throw std::runtime_error("failed to find an universal queueFamily!");
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
 		float queuePriority[3] = { 1.0f , 1.0f, 1.0f};
 		VkDeviceQueueCreateInfo queueCreateInfo = {};
 		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-		queueCreateInfo.queueFamilyIndex = universalFamilyIndex;
+		queueCreateInfo.queueFamilyIndex = universalQueueFamilyIndex;
 		queueCreateInfo.queueCount = 3;
 		queueCreateInfo.pQueuePriorities = queuePriority;
 		queueCreateInfos.push_back(queueCreateInfo);
@@ -59,12 +61,12 @@ namespace Engine::RenderCore {
 			createInfo.enabledLayerCount = 0;
 		}
 
-		if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+		if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &this->get()) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create logical device!");
 		}
-		vkGetDeviceQueue(device, universalFamilyIndex, 0, &graphicsQueue);
-		vkGetDeviceQueue(device, universalFamilyIndex, 1, &transferQueue);
-		vkGetDeviceQueue(device, universalFamilyIndex, 2, &computeQueue);
+		vkGetDeviceQueue(this->get(), universalQueueFamilyIndex, 0, &graphicsQueue);
+		vkGetDeviceQueue(this->get(), universalQueueFamilyIndex, 1, &transferQueue);
+		vkGetDeviceQueue(this->get(), universalQueueFamilyIndex, 2, &computeQueue);
 	}
 
 }

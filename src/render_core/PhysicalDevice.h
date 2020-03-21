@@ -1,22 +1,22 @@
+#pragma once
 #include <vulkan/vulkan.h>
-
+#include "VkComp.h"
 namespace Engine::RenderCore {
-	class PhysicalDevice
+	class PhysicalDevice : public VkComp<VkPhysicalDevice>
 	{
 	public:
-		PhysicalDevice(VkInstance instance, VkSurfaceKHR surface);
-
-		VkPhysicalDevice get();
+		PhysicalDevice() = default;
+		
+		// Inherited via VkComp
+		virtual void init(Application* app) override;
 	private:
-		VkPhysicalDevice physicalDevice;
-
-		VkSurfaceKHR surfaceCopy;
 
 		void pickPhysicalDevice(VkInstance instance);
 
 		bool isPhysicalDeviceSuitable(VkPhysicalDevice physicalDevice);
 
 		bool checkPhysicalDeviceExtensionSupport(VkPhysicalDevice physicalDevice);
+
 	};
 
 }

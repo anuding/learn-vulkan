@@ -8,19 +8,22 @@
 #include <vulkan/vulkan.h>
 #include "../utils/ValidationUtil.h"
 #include "../utils/DeviceQueueUtil.h"
+#include "VkComp.h"
 namespace Engine::RenderCore {
 
-	class Device
+	class Device : public VkComp<VkDevice> 
 	{
 	public:
-		Device(VkPhysicalDevice physicalDevice);
+		Device() = default;
 		~Device();
-		VkDevice get();
-	private:
-		VkDevice device;
+		void init(Application* app) override;
+
+		uint32_t universalQueueFamilyIndex = -1;
 		VkQueue graphicsQueue;
 		VkQueue transferQueue;
 		VkQueue computeQueue;
+	private:
+
 
 		void createLogicalDevice(VkPhysicalDevice physicalDevice);
 	};

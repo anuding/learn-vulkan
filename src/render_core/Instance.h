@@ -7,17 +7,16 @@
 
 #include <vulkan/vulkan.h>
 #include <vector>
-
+#include "VkComp.h"
 namespace Engine::RenderCore {
-	class Instance
+	class Instance : public VkComp<VkInstance>
 	{
 	public:
-		Instance(bool enableValidationLayers);
+		Instance() = default;
 		~Instance();
-		VkInstance get();
+		void init(Application* app) override;
 		void printInfo();
 	private:
-		VkInstance instance;
 
 		void createInstance(bool enableValidationLayers);
 

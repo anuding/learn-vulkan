@@ -1,6 +1,6 @@
 #pragma once
 #include <GLFW/glfw3.h>
-#include "VKComp.h"
+#include "VkComp.h"
 
 namespace Engine::RenderCore {
 	class Window : public VkComp<GLFWwindow*> {

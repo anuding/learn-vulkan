@@ -1,1 +1,1 @@
-#include "VKComp.h"
+#include "VkComp.h"

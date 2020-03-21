@@ -7,27 +7,26 @@
 #include "../utils/ValidationUtil.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
-
+#include "Application.h"
 namespace Engine::RenderCore {
-	Instance::Instance(bool enableValidationLayers) {
-		createInstance(enableValidationLayers);
-	}
 	Instance::~Instance()
 	{
-		vkDestroyInstance(instance, nullptr);
+		vkDestroyInstance(app->instance.get(), nullptr);
 	}
-	VkInstance Instance::get()
+	void Instance::init(Application* app)
 	{
-		return instance;
+		this->app = app;
+		createInstance(app->ENABLE_VALIDATION_LAYERS);
 	}
+
 	void Instance::printInfo()
 	{
 		uint32_t cnt;
-		vkEnumeratePhysicalDevices(instance, &cnt, nullptr);
+		vkEnumeratePhysicalDevices(app->instance.get(), &cnt, nullptr);
 		if (cnt == 0)
 			throw std::runtime_error("No physical device!");
 		std::vector<VkPhysicalDevice> vkPhysicalDevices(cnt);
-		vkEnumeratePhysicalDevices(instance, &cnt, vkPhysicalDevices.data());
+		vkEnumeratePhysicalDevices(app->instance.get(), &cnt, vkPhysicalDevices.data());
 
 
 		for (const auto& physicalDevice : vkPhysicalDevices) {
@@ -92,8 +91,8 @@ namespace Engine::RenderCore {
 			instanceCreateInfo.pNext = nullptr;
 		}
 
-		if (vkCreateInstance(&instanceCreateInfo, nullptr, &instance) != VK_SUCCESS) {
-			throw std::runtime_error("failed to create instance!");
+		if (vkCreateInstance(&instanceCreateInfo, nullptr, &app->instance.get()) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create app->instance.get()!");
 		}
 
 	}
