@@ -1,24 +1,8 @@
 #include <iostream>
-#include "utils/ValidationUtil.h"
+#include "render_core/Application.h"
 
-#include "render_core/Instance.h"
-#include "render_core/Surface.h"
-#include "render_core/Window.h"
-#include "render_core/PhysicalDevice.h"
-#include "render_core/Device.h"
-//#include "common/LVECommon.h"
 int main() {
-	using namespace Engine::RenderCore;
-	using namespace Engine::Utils;
-	Window window(800, 600, "test");
-	Instance instance(true);
-	ValidationLayerDebugger debugLayer(instance.get());
-	Surface surface(instance.get(), window.get());
-	PhysicalDevice physicalDevice(instance.get(), surface.get());
-	Device device(physicalDevice.get());
-	instance.printInfo();
-
-	std::cout << "DDDDDDDDDDDDDDDDDD" << std::endl;
+	Engine::RenderCore::Application app(800, 600, "test", true);
 	return 0;
 }
 //#include "Game.h"
