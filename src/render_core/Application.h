@@ -15,8 +15,6 @@
 #include "CommandPool.h"
 #include "Semaphore.h"
 #include "Fence.h"
-//#include "Command.h"
-//#include "Semaphore.h"
 
 namespace Engine::RenderCore {
 	class Application {
@@ -49,9 +47,8 @@ namespace Engine::RenderCore {
 		const size_t WINDOW_HEIGHT;
 		const char* WINDOW_NAME;
 		const bool ENABLE_VALIDATION_LAYERS;
-	private:
-	
 
+	private:
 		std::chrono::system_clock::time_point a = std::chrono::system_clock::now();
 		std::chrono::system_clock::time_point b = std::chrono::system_clock::now();
 
