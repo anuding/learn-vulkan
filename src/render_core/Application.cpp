@@ -66,16 +66,19 @@ namespace Engine::RenderCore {
 		//updateUniformBuffer(imageIndex);
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores.get()[currentFrame] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores.get()[currentFrame] };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandPool.commandBuffers[imageIndex];
 		VkSemaphore signalSemaphores[] = { renderFinishedSemaphores.get()[currentFrame] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandPool.commandBuffers[imageIndex];
+
 		if (vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, inFlightFences.get()[currentFrame]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to submit draw command");
 		}

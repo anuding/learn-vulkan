@@ -60,16 +60,5 @@ namespace Engine::RenderCore {
 			bool enableValidationLayers);
 		void mainLoop();
 		void drawFrame();
-	/*	void initVulkan();
-
-		void run();
-
-		void mainLoop();
-
-		void cleanUp();
-
-		virtual void drawFrame();
-
-		virtual void update() = 0;*/
 	};
 }
