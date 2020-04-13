@@ -18,6 +18,6 @@ add_library(LVERenderCore
 	CommandPool.cpp
 	Semaphore.cpp
 	Fence.cpp
-)
+	Texture.cpp)
 target_link_libraries(LVERenderCore LVECommon)
 target_link_libraries(LVERenderCore LVEUtil)
