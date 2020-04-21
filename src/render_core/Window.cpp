@@ -5,7 +5,7 @@ namespace Engine::RenderCore {
 	void Window::init(Application* app)
 	{
 		this->app = app;
-		glfwInit();
+		auto isInit = glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_FALSE);
 		this->get() = glfwCreateWindow(this->app->WINDOW_WIDTH, this->app->WINDOW_HEIGHT, this->app->WINDOW_NAME, nullptr, nullptr);
