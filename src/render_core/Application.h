@@ -15,6 +15,8 @@
 #include "CommandPool.h"
 #include "Semaphore.h"
 #include "Fence.h"
+#include "Sampler.h"
+#include "Texture.h"
 
 namespace Engine::RenderCore {
 	class Application {
@@ -39,6 +41,8 @@ namespace Engine::RenderCore {
 		Semaphore renderFinishedSemaphores;
 		Fence inFlightFences;
 		Fence imagesInFlight;
+		Sampler sampler;
+		Texture tex;
 
 		size_t currentFrame = 0;
 		const int MAX_FRAMES_IN_FLIGHT = 2;

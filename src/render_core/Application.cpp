@@ -31,6 +31,9 @@ namespace Engine::RenderCore {
 		renderFinishedSemaphores.init(this);
 		inFlightFences.init(this);
 		imagesInFlight.init(this);
+		sampler.init(this);
+
+		//tex.init(this,"C:\\Users\\ANUDING\\Pictures\\kfc.jpg");
 
 		instance.printInfo();
 		mainLoop();
