@@ -74,7 +74,7 @@ namespace Engine::RenderCore::BufferFactory {
 	//	bufferCopy.size = size;
 	//	vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &bufferCopy);
 
-	//	CommandHelper::endSingleCommandBuffer(commandBuffer);
+	//	CommandHelper::endSingleTimeCommands(commandBuffer);
 	//}
 
 	//void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout)
@@ -118,7 +118,7 @@ namespace Engine::RenderCore::BufferFactory {
 	//	}
 	//	vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
-	//	CommandHelper::endSingleCommandBuffer(commandBuffer);
+	//	CommandHelper::endSingleTimeCommands(commandBuffer);
 	//}
 
 	//void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height)
@@ -139,7 +139,7 @@ namespace Engine::RenderCore::BufferFactory {
 	//	bufferImageCopy.imageExtent = { width,height,1 };
 	//	vkCmdCopyBufferToImage(commandBuffer, buffer, image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &bufferImageCopy);
 
-	//	CommandHelper::endSingleCommandBuffer(commandBuffer);
+	//	CommandHelper::endSingleTimeCommands(commandBuffer);
 	//}
 
 	//void createUniformBuffer() {
