@@ -20,6 +20,7 @@ namespace Engine::RenderCore {
         VkCommandBuffer beginSingleTimeCommands();
 
         void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+        void recordCommandBuffers();
 
     private:
 
@@ -27,7 +28,6 @@ namespace Engine::RenderCore {
 
         void allocateCommandBuffers();
 
-        void recordCommandBuffers();
 
       
 

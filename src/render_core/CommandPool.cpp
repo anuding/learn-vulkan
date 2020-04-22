@@ -18,7 +18,7 @@ namespace Engine::RenderCore {
 		this->app = app;
 		createCommandPool();
 		allocateCommandBuffers();
-		recordCommandBuffers();
+		//recordCommandBuffers();
 	}
 	void  CommandPool::createCommandPool() {
 		VkCommandPoolCreateInfo commandPoolCreateInfo = {};
@@ -69,6 +69,10 @@ namespace Engine::RenderCore {
 				vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(gameObj.getComponent<Mesh>()->indices.size()), 1,
 					0, 0, 0);
 			}*/
+			vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS,
+				this->app->pipeLine.layout, 0, 1,
+				&this->app->descriptorPool.sets[i], 0,
+				nullptr);
 			vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
 			vkCmdEndRenderPass(commandBuffers[i]);
 			if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS) {

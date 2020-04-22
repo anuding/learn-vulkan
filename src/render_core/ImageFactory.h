@@ -6,4 +6,5 @@
 
 namespace Engine::RenderCore::ImageFactory {
 	std::unique_ptr<Image> createImage(Application* app, uint32_t width, uint32_t height);
+	std::unique_ptr<Image> createImageFromFile(Application* app, const char* path);
 }

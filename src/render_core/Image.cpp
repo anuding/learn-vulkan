@@ -5,8 +5,10 @@
 namespace Engine::RenderCore {
 	Image::~Image()
 	{
+		vkDestroyImageView(this->app->device.get(), imageView, nullptr);
 		vkDestroyImage(this->app->device.get(), this->get(), nullptr);
 		vkFreeMemory(this->app->device.get(), imageMemory, nullptr);
+		printf("image destructed.\n");
 	}
 
 	void Image::init(Application* app)
@@ -15,13 +17,14 @@ namespace Engine::RenderCore {
 	}
 
 	void Image::createImage(const VkImageCreateInfo& createInfo, const VkMemoryPropertyFlags& properties) {
+		//create image
 		if (vkCreateImage(this->app->device.get(), &createInfo, nullptr, &this->get()) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create Image!");
 		}
 
+		//create image memory
 		VkMemoryRequirements memRequirements;
 		vkGetImageMemoryRequirements(this->app->device.get(), this->get(), &memRequirements);
-
 		VkMemoryAllocateInfo allocInfo = {};
 		allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 		allocInfo.allocationSize = memRequirements.size;
@@ -29,17 +32,25 @@ namespace Engine::RenderCore {
 		if (vkAllocateMemory(this->app->device.get(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
 			throw std::runtime_error("failed to allocate image memory!");
 		}
-
 		vkBindImageMemory(this->app->device.get(), this->get(), imageMemory, 0);
+
+		//create image view
+		VkImageViewCreateInfo viewInfo = {};
+		viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewInfo.image = this->get();
+		viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+		viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewInfo.subresourceRange.baseMipLevel = 0;
+		viewInfo.subresourceRange.levelCount = 1;
+		viewInfo.subresourceRange.baseArrayLayer = 0;
+		viewInfo.subresourceRange.layerCount = 1;
+		if (vkCreateImageView(this->app->device.get(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+			throw std::runtime_error("failed to create image view");
+		}
 	}
 
-	//void Image::updateImageMemory(unsigned char* imageData, uint32_t size)
-	//{
-	//	void* data;
-	//	vkMapMemory(this->app->device.get(), imageMemory, 0, size, 0, &data);
-	//	memcpy(data, imageData, static_cast<size_t>(size));
-	//	vkUnmapMemory(this->app->device.get(), imageMemory);
-	//}
+
 	uint32_t Image::findImageMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;

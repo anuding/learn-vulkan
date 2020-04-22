@@ -1,4 +1,5 @@
 
 glslangValidator -V tri.vert.glsl
 glslangValidator -V tri.frag.glsl
-move *.spv ../../assets/spv_shaders/
+copy *.spv ..\out\build\Vulkan-x64-Debug\assets\spv_shaders\
+move *.spv ..\..\assets\spv_shaders\

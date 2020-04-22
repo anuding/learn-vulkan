@@ -18,12 +18,13 @@ add_library(LVERenderCore
 	CommandPool.cpp
 	Semaphore.cpp
 	Fence.cpp
-	Texture.cpp "Sampler.cpp" 
+	 "Sampler.cpp" 
 	
 	Buffer.cpp
 	 "Image.cpp"
 	 BufferFactory.cpp
-	 ImageFactory.cpp)
+	 ImageFactory.cpp
+	 "DescriptorPool.cpp")
 
 target_include_directories(LVERenderCore PUBLIC ${PROJECT_SOURCE_DIR}\\3rd\\stb)
 

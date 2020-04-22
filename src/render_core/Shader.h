@@ -7,7 +7,7 @@
 #include <glm/detail/type_mat2x2.hpp>
 #include "VkComp.h"
 namespace Engine::RenderCore {
-        struct UniformBufferObject{
+        struct UBO_MVP{
             glm::mat4 model;
             glm::mat4 view;
             glm::mat4 proj;

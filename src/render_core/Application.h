@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <memory>
 
 #include "Window.h"
 #include "Surface.h"
@@ -16,7 +17,9 @@
 #include "Semaphore.h"
 #include "Fence.h"
 #include "Sampler.h"
-#include "Texture.h"
+#include "Buffer.h"
+#include "DescriptorPool.h"
+#include "Image.h"
 
 namespace Engine::RenderCore {
 	class Application {
@@ -42,7 +45,12 @@ namespace Engine::RenderCore {
 		Fence inFlightFences;
 		Fence imagesInFlight;
 		Sampler sampler;
-		Texture tex;
+
+		//resources
+		std::vector<std::unique_ptr<Buffer>> uniformBuffers;
+		std::unique_ptr<Image> tex;
+		//resources descriptors
+		DescriptorPool descriptorPool;
 
 		size_t currentFrame = 0;
 		const int MAX_FRAMES_IN_FLIGHT = 2;

@@ -13,6 +13,9 @@ namespace Engine::RenderCore {
         Pipeline() = default;
         ~Pipeline();
         virtual void init(Application* app) override;
+
+        VkPipelineLayout layout;
+
     private:
         void createGraphicsPipelines();
     };
