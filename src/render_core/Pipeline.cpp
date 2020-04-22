@@ -10,6 +10,8 @@
 
 namespace Engine::RenderCore {
     Pipeline::~Pipeline() {
+        vkDestroyPipelineLayout(app->device.get(), layout, nullptr);
+
         vkDestroyPipeline(app->device.get(), this->get(), nullptr);
     }
 
@@ -117,15 +119,14 @@ namespace Engine::RenderCore {
         colorBlendStateCreateInfo.blendConstants[2] = 0.0f;
         colorBlendStateCreateInfo.blendConstants[3] = 0.0f;
 
-        VkPipelineLayout pipelineLayout;
         VkPipelineLayoutCreateInfo pipelineLayoutCreateInfo = {};
         pipelineLayoutCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-        pipelineLayoutCreateInfo.setLayoutCount = 0;
-        //pipelineLayoutCreateInfo.pSetLayouts = &descriptorSetLayout;
+        pipelineLayoutCreateInfo.setLayoutCount = 1;
+        pipelineLayoutCreateInfo.pSetLayouts = &this->app->descriptorPool.layout;
         pipelineLayoutCreateInfo.pushConstantRangeCount = 0;
         pipelineLayoutCreateInfo.pPushConstantRanges = nullptr;
 
-        if (vkCreatePipelineLayout(app->device.get(), &pipelineLayoutCreateInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+        if (vkCreatePipelineLayout(app->device.get(), &pipelineLayoutCreateInfo, nullptr, &layout) != VK_SUCCESS) {
             throw std::runtime_error("failed to create pipelinelayout");
         }
 
@@ -142,7 +143,7 @@ namespace Engine::RenderCore {
         pipelineCreateInfo.pDepthStencilState = &depthStencilStateCreateInfo;
         pipelineCreateInfo.pColorBlendState = &colorBlendStateCreateInfo;
         pipelineCreateInfo.pDynamicState = nullptr;
-        pipelineCreateInfo.layout = pipelineLayout;
+        pipelineCreateInfo.layout = layout;
         pipelineCreateInfo.renderPass = app->renderPass.get();
         pipelineCreateInfo.subpass = 0;
         pipelineCreateInfo.basePipelineHandle = VK_NULL_HANDLE;
@@ -153,6 +154,5 @@ namespace Engine::RenderCore {
             VK_SUCCESS) {
             throw std::runtime_error("failed to create pipeline");
         }
-        vkDestroyPipelineLayout(app->device.get(), pipelineLayout, nullptr);
     }
 }

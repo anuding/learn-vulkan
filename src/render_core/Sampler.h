@@ -8,15 +8,12 @@
 #include "VkComp.h"
 
 namespace Engine::RenderCore {
-    class Pipeline : public VkComp<VkPipeline> {
+    class Sampler : public VkComp<VkSampler> {
     public:
-        Pipeline() = default;
-        ~Pipeline();
+        Sampler() = default;
+        ~Sampler();
         virtual void init(Application* app) override;
-
-        VkPipelineLayout layout;
-
     private:
-        void createGraphicsPipelines();
+        void createSampler();
     };
 }

@@ -16,17 +16,20 @@ namespace Engine::RenderCore {
         virtual void init(Application* app) override;
 
         std::vector<VkCommandBuffer> commandBuffers;
+
+        VkCommandBuffer beginSingleTimeCommands();
+
+        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+        void recordCommandBuffers();
+
     private:
 
         void createCommandPool();
 
         void allocateCommandBuffers();
 
-        void recordCommandBuffers();
 
-        VkCommandBuffer beginSingleTimeCommands();
-
-        void endSingleCommandBuffer(VkCommandBuffer commandBuffer);
+      
 
     };
 }

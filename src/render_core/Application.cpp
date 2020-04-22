@@ -1,6 +1,8 @@
 #include <vector>
 #include <set>
 #include <thread>
+#include "BufferFactory.h"
+#include "ImageFactory.h"
 
 #include "Application.h"
 #include "../utils/ValidationUtil.h"
@@ -9,7 +11,7 @@ namespace Engine::RenderCore {
 	Application::Application(size_t width, size_t height, const char* windowName, bool enableValidationLayers)
 		: WINDOW_WIDTH(width), WINDOW_HEIGHT(height), WINDOW_NAME(windowName), ENABLE_VALIDATION_LAYERS(enableValidationLayers)
 	{
-		//order matters!
+		//main comps init, order matters!
 		window.init(this);
 		instance.init(this);
 		Engine::Utils::ValidationLayerDebugger debugLayer(instance.get());
@@ -19,18 +21,26 @@ namespace Engine::RenderCore {
 		swapChain.init(this);
 		renderPass.init(this);
 		frameBuffer.init(this);
-
-		vertShader.init(this);
-		fragShader.init(this);
-		vertShader.load("assets/spv_shaders/vert.spv");
-		fragShader.load("assets/spv_shaders/frag.spv");
-
-		pipeLine.init(this);
 		commandPool.init(this);
 		imageAvailableSemaphores.init(this);
 		renderFinishedSemaphores.init(this);
 		inFlightFences.init(this);
 		imagesInFlight.init(this);
+
+		//resources loading
+		vertShader.init(this);
+		fragShader.init(this);
+		vertShader.load("assets/spv_shaders/vert.spv");
+		fragShader.load("assets/spv_shaders/frag.spv");
+		sampler.init(this);
+		tex = ImageFactory::createImageFromFile(this, "C:\\Users\\ANUDING\\Pictures\\kfc.jpg");
+		uniformBuffers.resize(this->swapChain.imageCount);
+		for (auto& ub : uniformBuffers)
+			ub = BufferFactory::createMVPUniformBuffer(this);
+
+		descriptorPool.init(this);
+		pipeLine.init(this);
+		commandPool.recordCommandBuffers();
 
 		instance.printInfo();
 		mainLoop();
@@ -66,16 +76,19 @@ namespace Engine::RenderCore {
 		//updateUniformBuffer(imageIndex);
 		VkSubmitInfo submitInfo = {};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores.get()[currentFrame] };
 		VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+		submitInfo.pWaitDstStageMask = waitStages;
+
+		VkSemaphore waitSemaphores[] = { imageAvailableSemaphores.get()[currentFrame] };
 		submitInfo.waitSemaphoreCount = 1;
 		submitInfo.pWaitSemaphores = waitSemaphores;
-		submitInfo.pWaitDstStageMask = waitStages;
-		submitInfo.commandBufferCount = 1;
-		submitInfo.pCommandBuffers = &commandPool.commandBuffers[imageIndex];
 		VkSemaphore signalSemaphores[] = { renderFinishedSemaphores.get()[currentFrame] };
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = signalSemaphores;
+
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &commandPool.commandBuffers[imageIndex];
+
 		if (vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, inFlightFences.get()[currentFrame]) != VK_SUCCESS) {
 			throw std::runtime_error("failed to submit draw command");
 		}

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <chrono>
+#include <memory>
 
 #include "Window.h"
 #include "Surface.h"
@@ -15,8 +16,10 @@
 #include "CommandPool.h"
 #include "Semaphore.h"
 #include "Fence.h"
-//#include "Command.h"
-//#include "Semaphore.h"
+#include "Sampler.h"
+#include "Buffer.h"
+#include "DescriptorPool.h"
+#include "Image.h"
 
 namespace Engine::RenderCore {
 	class Application {
@@ -41,6 +44,13 @@ namespace Engine::RenderCore {
 		Semaphore renderFinishedSemaphores;
 		Fence inFlightFences;
 		Fence imagesInFlight;
+		Sampler sampler;
+
+		//resources
+		std::vector<std::unique_ptr<Buffer>> uniformBuffers;
+		std::unique_ptr<Image> tex;
+		//resources descriptors
+		DescriptorPool descriptorPool;
 
 		size_t currentFrame = 0;
 		const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -49,9 +59,8 @@ namespace Engine::RenderCore {
 		const size_t WINDOW_HEIGHT;
 		const char* WINDOW_NAME;
 		const bool ENABLE_VALIDATION_LAYERS;
-	private:
-	
 
+	private:
 		std::chrono::system_clock::time_point a = std::chrono::system_clock::now();
 		std::chrono::system_clock::time_point b = std::chrono::system_clock::now();
 
@@ -63,16 +72,5 @@ namespace Engine::RenderCore {
 			bool enableValidationLayers);
 		void mainLoop();
 		void drawFrame();
-	/*	void initVulkan();
-
-		void run();
-
-		void mainLoop();
-
-		void cleanUp();
-
-		virtual void drawFrame();
-
-		virtual void update() = 0;*/
 	};
 }
