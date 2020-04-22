@@ -9,10 +9,14 @@ namespace Engine::RenderCore {
 		~Image();
 
 		virtual void init(Application* app) override;
-		VkImageCreateInfo createInfo = {};
-
+		void createImage(const VkImageCreateInfo& createInfo, const VkMemoryPropertyFlags& properties);
+		//void updateImageMemory(unsigned char* data, uint32_t size);
+		void transitionImageLayout(VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 	private:
 		VkImageView imageView;
 		VkDeviceMemory imageMemory;
+
+		uint32_t findImageMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
 	};
 }
