@@ -97,7 +97,7 @@ namespace Engine::RenderCore {
 		return commandBuffer;
 	}
 
-	void  CommandPool::endSingleTimeCommands(VkCommandBuffer commandBuffer) {
+	void  CommandPool::endSingleCommandBuffer(VkCommandBuffer commandBuffer) {
 		vkEndCommandBuffer(commandBuffer);
 
 		VkSubmitInfo submitInfo = {};

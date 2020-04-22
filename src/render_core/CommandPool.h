@@ -16,11 +16,6 @@ namespace Engine::RenderCore {
         virtual void init(Application* app) override;
 
         std::vector<VkCommandBuffer> commandBuffers;
-
-        VkCommandBuffer beginSingleTimeCommands();
-
-        void endSingleTimeCommands(VkCommandBuffer commandBuffer);
-
     private:
 
         void createCommandPool();
@@ -29,7 +24,9 @@ namespace Engine::RenderCore {
 
         void recordCommandBuffers();
 
-      
+        VkCommandBuffer beginSingleTimeCommands();
+
+        void endSingleCommandBuffer(VkCommandBuffer commandBuffer);
 
     };
 }
