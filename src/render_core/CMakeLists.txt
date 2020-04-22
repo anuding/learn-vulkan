@@ -22,7 +22,8 @@ add_library(LVERenderCore
 	
 	Buffer.cpp
 	 "Image.cpp"
-	 BufferFactory.cpp)
+	 BufferFactory.cpp
+	 ImageFactory.cpp)
 
 target_include_directories(LVERenderCore PUBLIC ${PROJECT_SOURCE_DIR}\\3rd\\stb)
 

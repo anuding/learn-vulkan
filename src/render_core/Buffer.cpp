@@ -6,6 +6,7 @@ namespace Engine::RenderCore {
 	Buffer::~Buffer()
 	{
 		vkDestroyBuffer(this->app->device.get(), this->get(), nullptr);
+		vkFreeMemory(this->app->device.get(), bufferMemory, nullptr);
 	}
 
 	void Buffer::init(Application* app)

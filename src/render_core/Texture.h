@@ -1,7 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include "Image.h"
-#include "Buffer.h"
+#include <memory>
 
 namespace Engine::RenderCore {
 	class Application;
@@ -9,15 +9,14 @@ namespace Engine::RenderCore {
 	public:
 		Texture() = default;
 		~Texture();
-		void init(Application* app,  char* path);
+		void init(Application* app, char* path);
 
 	private:
 		char* path;
 		Application* app;
-		Image image;
-		Buffer stagingBuffer;
+		std::unique_ptr<Image> image;
 		void createTexture();
-		void loadRawImage(const char* path, unsigned char*& imageData, uint64_t& dataSize);
+		void loadRawImage(const char* path, unsigned char*& imageData, int& width, int& height);
 
 	};
 }
