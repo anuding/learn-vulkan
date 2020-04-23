@@ -26,7 +26,5 @@ add_library(LVERenderCore
 	 ImageFactory.cpp
 	 "DescriptorPool.cpp")
 
-target_include_directories(LVERenderCore PUBLIC ${PROJECT_SOURCE_DIR}\\3rd\\stb)
-
 target_link_libraries(LVERenderCore LVECommon)
 target_link_libraries(LVERenderCore LVEUtil)

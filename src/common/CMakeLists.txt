@@ -7,7 +7,11 @@ if(WIN32)
 	set(VULKAN_H ${CG_SDK}\\VulkanSDK\\1.1.121.2\\Include)
 	set(VULKAN_LINK ${CG_SDK}\\VulkanSDK\\1.1.121.2\\Lib\\vulkan-1.lib)
 	set(GLM_H ${CG_SDK}\\glm)
-	
+	set(STB_IMAGE_H ${PROJECT_SOURCE_DIR}\\3rd\\stb)
+	set(TINY_GLTF_H ${PROJECT_SOURCE_DIR}\\3rd\\gltf)
+
+	target_include_directories(LVECommon PUBLIC ${STB_IMAGE_H})
+	target_include_directories(LVECommon PUBLIC ${TINY_GLTF_H})
 	target_include_directories(LVECommon PUBLIC ${GLFW_H})
 	target_link_libraries(LVECommon ${GLFW_LINK})
 	target_include_directories(LVECommon PUBLIC ${VULKAN_H})
